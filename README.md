@@ -27,6 +27,8 @@ Usage: ./ccsrch <options> <start path>
                    or 2 format
     -T             Check for both Track 1 and Track 2 patterns
     -c             Show a count of hits per file (only when using -o)
+    -l N           Limits the number of results from a single file before going
+                   on to the next file.
     -h             Usage information
 ```
 
@@ -145,6 +147,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 1.0.4 (In Development):
 
 * Added option to output the file name, and how many hits were found to the console when using -o (see -c in usage).
+* Added option to limit the number of results from a single file before going on to the next file (see -l in usage).
 
 1.0.3 (Aug. 28, 2007):
 

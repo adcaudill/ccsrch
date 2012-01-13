@@ -56,6 +56,7 @@ int    trackdatacount=0;
 char   lastfilename[MAXPATH];
 int    filename_pan_count=0;
 int    file_hit_count=0;
+int    limit_file_results=0;
 
 void initialize_buffer()
 {
@@ -270,6 +271,7 @@ int ccsrch(char *filename)
   int   counter = 0;
   int   total = 0;
   int   check = 0;
+  int   limit_exceeded = 0;
   
 #ifdef DEBUG
   printf("Processing file %s\n",filename);
@@ -295,15 +297,16 @@ int ccsrch(char *filename)
 
   initialize_buffer();
 
-  while (1)
+  while (1 && limit_exceeded == 0)
   {
     memset(&ccsrch_buf, '\0', BSIZE);
     cnt = read(infd, &ccsrch_buf, BSIZE - 1);
     if (cnt <= 0)
       break;
+    	
     ccsrch_index = 0;
 
-    while (ccsrch_index < cnt)
+    while (ccsrch_index < cnt && limit_exceeded == 0)
     {
       //check to see if our data is 0...9 (based on ACSII value)
       if ((ccsrch_buf[ccsrch_index] >= 48) && (ccsrch_buf[ccsrch_index] <= 57))
@@ -362,6 +365,10 @@ int ccsrch(char *filename)
       }
       byte_offset++;
       ccsrch_index++;
+      
+      //check to see if we've hit the limit for the current file
+      if (limit_file_results > 0 && file_hit_count >= limit_file_results)
+    	  limit_exceeded = 1;
     }
   }
 
@@ -700,6 +707,7 @@ void usage(char *progname)
   printf("    -t <1 or 2>\t   Check if the pattern follows either a Track 1 \n\t\t   or 2 format\n");
   printf("    -T\t\t   Check for both Track 1 and Track 2 patterns\n");
   printf("    -c\t\t   Show a count of hits per file (only when using -o)\n");
+  printf("    -l N\t   Limits the number of results from a single file before going\n\t\t   on to the next file.\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
@@ -742,11 +750,12 @@ int main(int argc, char *argv[])
   char  *tracktype_str=NULL;
   char  tmpbuf[4096];
   int   inlen = 0, err=0, c=0;
+  int   limit_arg = 0;
 
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:c")) != -1)
+  while ((c = getopt(argc, argv,"befjt:To:cl:")) != -1)
   {
     switch (c)
     {
@@ -782,6 +791,13 @@ int main(int argc, char *argv[])
       break;
     case 'c':
     	print_file_hit_count=1;
+    	break;
+    case 'l':
+    	limit_arg = atoi(optarg);
+    	if (limit_arg > 0)
+    	  limit_file_results = limit_arg;
+    	else
+    		usage(argv[0]);
     	break;
     case 'h':
     default:
