@@ -749,17 +749,41 @@ int check_dir (char *name)
 
 int is_allowed_file_type (char *name)
 {
-	if(strstr(exclude_extensions, get_filename_ext(name)))
-		return (1);
-	else
-		return (0);
+	char delim[] = "|";
+	char *exclude = NULL;
+	char *result = NULL;
+	char *ext = NULL;
+	int ret = 0;
+	
+	exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
+	strcpy(exclude, exclude_extensions);
+	
+	ext = get_filename_ext(name);
+	if (ext != NULL && ext != "")
+	{
+		result = strtok(exclude, delim);
+		while(result != NULL)
+		{
+			if(strcmp(result, ext) ==0)
+		  {
+				ret = 1;
+				break;
+			}
+			else
+				result = strtok(NULL, delim);
+		}
+	}
+	free(exclude);
+	
+	return (ret);
 }
 
-const char *get_filename_ext(const char *filename) 
+char *get_filename_ext(char *filename) 
 {
-    const char *dot = strrchr(filename, '.');
-    if(!dot || dot == filename) return "";
-    return (dot + 1);
+	char *slash = strrchr(filename, '/');
+  char *dot = strrchr(slash, '.');
+  if(!dot || dot == slash) return "";
+  return (dot);
 }
 
 int main(int argc, char *argv[])

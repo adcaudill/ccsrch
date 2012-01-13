@@ -71,6 +71,6 @@ void signal_proc();
 int track1_srch(int len);
 int track2_srch(int len);
 void usage (char *prog);
-const char *get_filename_ext(const char *filename);
+char *get_filename_ext(char *filename);
 int is_allowed_file_type (char *name);
 
