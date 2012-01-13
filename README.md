@@ -145,6 +145,10 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 ### Revisions
 
+1.0.5 (Jan. 13, 2012):
+
+* Bug fixes.
+
 1.0.4 (Jan. 13, 2012):
 
 * Added option to output the file name, and how many hits were found to the console when using -o (see -c in usage).
