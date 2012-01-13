@@ -145,7 +145,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 ### Revisions
 
-1.0.4 (In Development):
+1.0.4 (Jan. 13, 2012):
 
 * Added option to output the file name, and how many hits were found to the console when using -o (see -c in usage).
 * Added option to limit the number of results from a single file before going on to the next file (see -l in usage).
