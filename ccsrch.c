@@ -46,6 +46,7 @@ int    print_byte_offset=0;
 int    print_epoch_time=0;
 int    print_julian_time=0;
 int    print_filename_only=0;
+int    print_file_hit_count=0;
 char   ccsrch_buf[BSIZE];
 int    ccsrch_index = 0;
 int    tracksrch=0;
@@ -54,6 +55,7 @@ int    tracktype2=0;
 int    trackdatacount=0;
 char   lastfilename[MAXPATH];
 int    filename_pan_count=0;
+int    file_hit_count=0;
 
 void initialize_buffer()
 {
@@ -149,6 +151,7 @@ void print_result(char *cardname, int cardlen, long byte_offset)
     fprintf(stdout, "%s\n", buf);
 
   total_count++;
+  file_hit_count++;
 }
 
 int track1_srch(int cardlen)
@@ -367,7 +370,6 @@ int ccsrch(char *filename)
   return (total);
 }
 
-
 int escape_space(char *infile, char *outfile)
 {
   int    i = 0;
@@ -515,6 +517,9 @@ int proc_dir_list(char *instr)
       memset(&tmpbuf, '\0', 4096);
       if (escape_space(curr_path, tmpbuf) == 0)
       {
+        //rest file_hit_count so we can keep track of many hits each file has
+        file_hit_count = 0;
+        
         /*
          * kludge, need to clean this up
          * later else any string matching in the path returns non NULL
@@ -525,6 +530,8 @@ int proc_dir_list(char *instr)
           else
           {
             ccsrch(curr_path);
+            if (file_hit_count > 0 && print_file_hit_count == 1)
+              fprintf(stdout, "%s: %d hits\n", curr_path, file_hit_count);
           }
         else
         {
@@ -690,10 +697,9 @@ void usage(char *progname)
   printf("    -f\t\t   Only print the filename w/ potential PAN data\n"); 
   printf("    -j\t\t   Include the Modify Access and Create times in terms \n\t\t   of normal date/time\n");
   printf("    -o <filename>  Output the data to the file <filename> vs. standard out\n");
-
   printf("    -t <1 or 2>\t   Check if the pattern follows either a Track 1 \n\t\t   or 2 format\n");
   printf("    -T\t\t   Check for both Track 1 and Track 2 patterns\n");
-
+  printf("    -c\t\t   Show a count of hits per file (only when using -o)\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
@@ -740,7 +746,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:")) != -1)
+  while ((c = getopt(argc, argv,"befjt:To:c")) != -1)
   {
     switch (c)
     {
@@ -774,6 +780,9 @@ int main(int argc, char *argv[])
       tracktype1=1;
       tracktype2=1;
       break;
+    case 'c':
+    	print_file_hit_count=1;
+    	break;
     case 'h':
     default:
       usage(argv[0]);
