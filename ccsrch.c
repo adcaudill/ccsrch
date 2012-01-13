@@ -755,25 +755,28 @@ int is_allowed_file_type (char *name)
 	char *ext = NULL;
 	int ret = 0;
 	
-	exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
-	strcpy(exclude, exclude_extensions);
-	
-	ext = get_filename_ext(name);
-	if (ext != NULL && ext != "")
-	{
-		result = strtok(exclude, delim);
-		while(result != NULL)
+	if(exclude_extensions != NULL)
+  {
+		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
+		strcpy(exclude, exclude_extensions);
+		
+		ext = get_filename_ext(name);
+		if (ext != NULL && ext != "")
 		{
-			if(strcmp(result, ext) ==0)
-		  {
-				ret = 1;
-				break;
+			result = strtok(exclude, delim);
+			while(result != NULL)
+			{
+				if(strcmp(result, ext) ==0)
+			  {
+					ret = 1;
+					break;
+				}
+				else
+					result = strtok(NULL, delim);
 			}
-			else
-				result = strtok(NULL, delim);
 		}
-	}
-	free(exclude);
+		free(exclude);
+  }
 	
 	return (ret);
 }
