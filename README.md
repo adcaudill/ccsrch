@@ -131,7 +131,7 @@ Please note that ccsrch recurses through the filesystem given a start directory 
 
 ### Porting
 
-This tool has been successfully compiled and run on the following operating systems: FreeBSD, Linux, SCO 5.0.4-5.0.7, Solaris 8, AIX 4.1.X, Windows 2000, Windows XP, and Windows7.  If you have any issues getting it to run on any systems, please contact the author.
+This tool has been successfully compiled and run on the following operating systems: FreeBSD, Linux, SCO 5.0.4-5.0.7, Solaris 8, AIX 4.1.X, Windows 2000, Windows XP, and Windows 7.  If you have any issues getting it to run on any systems, please contact the author.
 
 ### Building
 
