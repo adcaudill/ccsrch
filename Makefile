@@ -1,5 +1,6 @@
 #
-# ccsrch (c) 2007 Mike Beekey  - zaphod2718@yahoo.com
+# ccsrch (c) 2012 Adam Caudill <adam@adamcaudill.com>
+#        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
 # All rights reserved
 #
 #
@@ -22,16 +23,8 @@
 #
 
 CC	=gcc
-#
-# for mingw use something like the following
-#INCL	= -I./ -I/mingw/include
-#LIBSDIR	=  -L./ -L/mingw/lib -L/mingw/mingw32/lib
-#
-# for *UNIX* the following tends to work
 INCL	= -I./
 CFLAGS	=-O2 -static
-#CFLAGS	=-O2 # for linux
-#CFLAGS	=-DDEBUG # if you want a lot of noise
 LDFLAGS	=-s
 OBJS=  ccsrch.o
 LIBSDIR	=  -L./
@@ -42,6 +35,7 @@ all:	${PROGS}
 
 ccsrch:	${OBJS}
 	${CC} ${CFLAGS} ${INCL} ${LDFLAGS} ${OBJS} ${LIBSDIR} ${LIBS} -o ccsrch
+	
 
 clean:
 	rm -f core *.core ${PROGS} ${OBJS} ccsrch.exe
