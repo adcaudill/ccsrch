@@ -267,6 +267,10 @@ int ccsrch(char *filename)
   int   counter = 0;
   int   total = 0;
   int   check = 0;
+  
+#ifdef DEBUG
+  printf("Processing file %s\n",filename);
+#endif
 
   memset(&lastfilename,'\0',MAXPATH);
   ccsrch_index=0;
@@ -304,7 +308,8 @@ int ccsrch(char *filename)
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-48;
         counter++;
-      } else if ((ccsrch_buf[ccsrch_index] != 0) && (ccsrch_buf[ccsrch_index] != 10) && (ccsrch_buf[ccsrch_index] != 13))
+      } 
+      else if ((ccsrch_buf[ccsrch_index] != 0) && (ccsrch_buf[ccsrch_index] != 10) && (ccsrch_buf[ccsrch_index] != 13))
       {
         /*
          * we consider nulls, new lines, and carriage
@@ -313,7 +318,8 @@ int ccsrch(char *filename)
          */
         check = 1;
         counter = 0;
-      } else
+      } 
+      else
       {
         check = 0;
         initialize_buffer();
@@ -518,16 +524,10 @@ int proc_dir_list(char *instr)
             fprintf(stderr, "We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", curr_path);
           else
           {
-#ifdef DEBUG
-printf("Processing file %s\n",curr_path);
-#endif
             ccsrch(curr_path);
           }
         else
         {
-#ifdef DEBUG
-printf("Processing file %s\n",curr_path);
-#endif
           ccsrch(curr_path);
         }
       }
