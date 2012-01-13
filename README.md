@@ -26,7 +26,7 @@ Usage: ./ccsrch <options> <start path>
     -t <1 or 2>    Check if the pattern follows either a Track 1
                    or 2 format
     -T             Check for both Track 1 and Track 2 patterns
-    -h             This stuff
+    -h             Usage information
 ```
 
 **Examples:**

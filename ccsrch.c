@@ -1,7 +1,9 @@
 /*
- * ccsrch (c) 2007 Mike Beekey  - zaphod2718@yahoo.com All rights reserved
+ * ccsrch (c) 2012 Adam Caudill <adam@adamcaudill.com>
+ *        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
  * 
- * 
+ * All rights reserved.
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
@@ -30,50 +32,48 @@
 #include <dirent.h>
 #include "ccsrch.h"
 
-char           *logfilename = NULL;
-char           *currfilename = NULL;
-FILE           *logfilefd = NULL;
-long            total_count = 0;
-long            file_count = 0;
-long		currfile_atime=0;
-long		currfile_mtime=0;
-long		currfile_ctime=0;
-int             init_time = 0;
-int		cardbuf[CARDSIZE];
-int 		print_byte_offset=0;
-int 		print_epoch_time=0;
-int 		print_julian_time=0;
-int 		print_filename_only=0;
-char            ccsrch_buf[BSIZE];
-int    		ccsrch_index = 0;
-int		tracksrch=0;
-int		tracktype1=0;
-int		tracktype2=0;
-int		trackdatacount=0;
-char		lastfilename[MAXPATH];
-int		filename_pan_count=0;
+char   *logfilename = NULL;
+char   *currfilename = NULL;
+FILE   *logfilefd = NULL;
+long   total_count = 0;
+long   file_count = 0;
+long   currfile_atime=0;
+long   currfile_mtime=0;
+long   currfile_ctime=0;
+int    init_time = 0;
+int    cardbuf[CARDSIZE];
+int    print_byte_offset=0;
+int    print_epoch_time=0;
+int    print_julian_time=0;
+int    print_filename_only=0;
+char   ccsrch_buf[BSIZE];
+int    ccsrch_index = 0;
+int    tracksrch=0;
+int    tracktype1=0;
+int    tracktype2=0;
+int    trackdatacount=0;
+char   lastfilename[MAXPATH];
+int    filename_pan_count=0;
 
-void
-initialize_buffer()
+void initialize_buffer()
 {
   int	i=0;
   for (i=0; i<CARDSIZE; i++)
     cardbuf[i]=0;
 }
 
-void 
-print_result(char *cardname, int cardlen, long byte_offset)
+void print_result(char *cardname, int cardlen, long byte_offset)
 {
-  int             i = 0;
-  char            nbuf[20];
-  char            buf[MAXPATH];
-  char		  basebuf[MDBUFSIZE];
-  char		  bytebuf[MDBUFSIZE];
-  char		  datebuf[MDBUFSIZE];
-  char		  mdatebuf[CARDTYPELEN];
-  char		  adatebuf[CARDTYPELEN];
-  char		  cdatebuf[CARDTYPELEN];
-  char		  trackbuf[MDBUFSIZE];
+  int		i = 0;
+  char	nbuf[20];
+  char	buf[MAXPATH];
+  char	basebuf[MDBUFSIZE];
+  char	bytebuf[MDBUFSIZE];
+  char	datebuf[MDBUFSIZE];
+  char	mdatebuf[CARDTYPELEN];
+  char	adatebuf[CARDTYPELEN];
+  char	cdatebuf[CARDTYPELEN];
+  char	trackbuf[MDBUFSIZE];
 
   memset(&nbuf, '\0', 20);
 
@@ -92,26 +92,25 @@ print_result(char *cardname, int cardlen, long byte_offset)
 
   strncat(buf,basebuf,MAXPATH);
 
-    if (print_byte_offset)
-    {
-      memset(&bytebuf,'\0',MDBUFSIZE);
-      snprintf(bytebuf, MDBUFSIZE, "\t%ld", byte_offset);
-      strncat(buf,bytebuf,MAXPATH);
-    }
-
+  if (print_byte_offset)
+  {
+    memset(&bytebuf,'\0',MDBUFSIZE);
+    snprintf(bytebuf, MDBUFSIZE, "\t%ld", byte_offset);
+    strncat(buf,bytebuf,MAXPATH);
+  }
     if (print_julian_time)
     {
       memset(&mdatebuf,'\0',CARDTYPELEN);
       strncpy(mdatebuf,ctime((time_t *)&currfile_mtime),CARDTYPELEN);
       mdatebuf[strlen(mdatebuf)-1]='\0';
 
-    memset(&adatebuf,'\0',CARDTYPELEN);
-    strncpy(adatebuf,ctime((time_t *)&currfile_atime),CARDTYPELEN);
-    adatebuf[strlen(adatebuf)-1]='\0';
-
-    memset(&cdatebuf,'\0',CARDTYPELEN);
-    strncpy(cdatebuf,ctime((time_t *)&currfile_ctime),CARDTYPELEN);
-    cdatebuf[strlen(cdatebuf)-1]='\0';
+	    memset(&adatebuf,'\0',CARDTYPELEN);
+	    strncpy(adatebuf,ctime((time_t *)&currfile_atime),CARDTYPELEN);
+	    adatebuf[strlen(adatebuf)-1]='\0';
+	
+	    memset(&cdatebuf,'\0',CARDTYPELEN);
+	    strncpy(cdatebuf,ctime((time_t *)&currfile_ctime),CARDTYPELEN);
+	    cdatebuf[strlen(cdatebuf)-1]='\0';
 
       memset(&datebuf,'\0',MDBUFSIZE);
       snprintf(datebuf, MDBUFSIZE, "\t%s\t%s\t%s", mdatebuf,adatebuf,cdatebuf);
@@ -185,9 +184,7 @@ int track2_srch(int cardlen)
     return(0);
 }
 
-
-int 
-process_prefix(int len, long offset)
+int process_prefix(int len, long offset)
 {
   switch (len)
   {
@@ -214,16 +211,13 @@ process_prefix(int len, long offset)
   return (0);
 }
 
-
-int 
-luhn_check(int len, long offset)
+int luhn_check(int len, long offset)
 {
   int    i = 0;
   int    tmp = 0;
   int    total = 0;
   int    nummod = 0;
-  int            num[CARDSIZE];
-
+  int    num[CARDSIZE];
 
   if (cardbuf[i]<=0)
     return(0);
@@ -263,18 +257,16 @@ luhn_check(int len, long offset)
   return (nummod);
 }
 
-
-int 
-ccsrch(char *filename)
+int ccsrch(char *filename)
 {
-  FILE           *in = NULL;
-  int             infd = 0;
-  int             cnt = 0;
-  long		  byte_offset=1;
-  int    k = 0;
-  int    counter = 0;
-  int    total = 0;
-  int    check = 0;
+  FILE  *in = NULL;
+  int   infd = 0;
+  int   cnt = 0;
+  long  byte_offset=1;
+  int   k = 0;
+  int   counter = 0;
+  int   total = 0;
+  int   check = 0;
 
   memset(&lastfilename,'\0',MAXPATH);
   ccsrch_index=0;
@@ -303,7 +295,6 @@ ccsrch(char *filename)
     if (cnt <= 0)
       break;
     ccsrch_index = 0;
-
 
     while (ccsrch_index < cnt)
     {
@@ -345,7 +336,8 @@ ccsrch(char *filename)
           luhn_check(13,byte_offset-13);
           break;
         }
-      } else if ((counter == CARDSIZE) && (check)) 
+      } 
+      else if ((counter == CARDSIZE) && (check)) 
       {
         for (k = 0; k < counter - 1; k++)
         {
@@ -369,12 +361,11 @@ ccsrch(char *filename)
 }
 
 
-int 
-escape_space(char *infile, char *outfile)
+int escape_space(char *infile, char *outfile)
 {
   int    i = 0;
   int    spc = 0;
-  char           *tmpbuf = NULL;
+  char   *tmpbuf = NULL;
   int    filelen = 0;
   int    newlen = 0;
   int    newpos = 0;
@@ -411,18 +402,17 @@ escape_space(char *infile, char *outfile)
   return (0);
 }
 
-int 
-get_file_stat(char *inputfile, struct stat * fileattr)
+int get_file_stat(char *inputfile, struct stat * fileattr)
 {
-  struct stat     ffattr;
-  int             err = 0;
-  char           *tmp2buf = NULL;
-  int    filelen = 0;
-
+  struct stat  ffattr;
+  int          err = 0;
+  char         *tmp2buf = NULL;
+  int          filelen = 0;
 
   filelen = strlen(inputfile);
   errno = 0;
   tmp2buf = (char *) malloc(filelen+1);
+  
   if (tmp2buf == NULL)
   {
     fprintf(stderr, "get_file_stat: can't allocate memory; errno=%d\n", errno);
@@ -450,8 +440,7 @@ get_file_stat(char *inputfile, struct stat * fileattr)
   return (0);
 }
 
-int 
-proc_dir_list(char *instr)
+int proc_dir_list(char *instr)
 {
   DIR            *dirptr;
   struct dirent  *direntptr;
@@ -560,11 +549,10 @@ printf("Processing file %s\n",curr_path);
   return (0);
 }
 
-void 
-check_mastercard_16(long offset)
+void check_mastercard_16(long offset)
 {
-  char            num2buf[3];
-  int             vnum = 0;
+  char  num2buf[3];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 3);
   snprintf(num2buf, 3, "%d%d\0", cardbuf[0], cardbuf[1]);
@@ -573,11 +561,10 @@ check_mastercard_16(long offset)
     print_result("MASTERCARD", 16, offset);
 }
 
-void 
-check_visa_16(long offset)
+void check_visa_16(long offset)
 {
-  char            num2buf[2];
-  int             vnum = 0;
+  char  num2buf[2];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 2);
   snprintf(num2buf, 2, "%d\0", cardbuf[0]);
@@ -586,11 +573,10 @@ check_visa_16(long offset)
     print_result("VISA", 16, offset);
 }
 
-void 
-check_discover_16(long offset)
+void check_discover_16(long offset)
 {
-  char            num2buf[5];
-  int             vnum = 0;
+  char  num2buf[5];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 5);
   snprintf(num2buf, 5, "%d%d%d%d\0", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
@@ -599,11 +585,10 @@ check_discover_16(long offset)
     print_result("DISCOVER", 16, offset);
 }
 
-void 
-check_jcb_16(long offset)
+void check_jcb_16(long offset)
 {
-  char            num2buf[5];
-  int             vnum = 0;
+  char  num2buf[5];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 2);
   snprintf(num2buf, 5, "%d%d%d%d\0", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
@@ -612,11 +597,10 @@ check_jcb_16(long offset)
     print_result("JCB", 16, offset);
 }
 
-void 
-check_amex_15(long offset)
+void check_amex_15(long offset)
 {
-  char            num2buf[3];
-  int             vnum = 0;
+  char  num2buf[3];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 3);
   snprintf(num2buf, 3, "%d%d\0", cardbuf[0], cardbuf[1]);
@@ -625,11 +609,10 @@ check_amex_15(long offset)
     print_result("AMEX", 15, offset);
 }
 
-void 
-check_enroute_15(long offset)
+void check_enroute_15(long offset)
 {
-  char            num2buf[5];
-  int             vnum = 0;
+  char  num2buf[5];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 5);
   snprintf(num2buf, 5, "%d%d%d%d\0", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
@@ -638,11 +621,10 @@ check_enroute_15(long offset)
     print_result("ENROUTE", 15, offset);
 }
 
-void 
-check_jcb_15(long offset)
+void check_jcb_15(long offset)
 {
-  char            num2buf[5];
-  int             vnum = 0;
+  char  num2buf[5];
+  int   vnum = 0;
 
   memset(&num2buf, '\0', 5);
   snprintf(num2buf, 5, "%d%d%d%d\0", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
@@ -651,13 +633,12 @@ check_jcb_15(long offset)
     print_result("JCB", 15, offset);
 }
 
-void 
-check_diners_club_cb_14(long offset)
+void check_diners_club_cb_14(long offset)
 {
-  char            num2buf[4];
-  char            num2buf2[3];
-  int             vnum = 0;
-  int             vnum2 = 0;
+  char  num2buf[4];
+  char  num2buf2[3];
+  int   vnum = 0;
+  int   vnum2 = 0;
 
   memset(&num2buf, '\0', 4);
   memset(&num2buf2, '\0', 2);
@@ -669,23 +650,7 @@ check_diners_club_cb_14(long offset)
     print_result("DINERS_CLUB_CARTE_BLANCHE", 14, offset);
 }
 
-/** It has been purported that these cards are no longer in use
-void 
-check_visa_13(long offset)
-{
-  char            num2buf[2];
-  int             vnum = 0;
-
-  memset(&num2buf, '\0', 2);
-  snprintf(num2buf, 2, "%d\0", cardbuf[0]);
-  vnum = atoi(num2buf);
-  if (vnum == 4)
-    print_result("VISA", 13, offset);
-}
-**/
-
-void 
-cleanup_shtuff()
+void cleanup_shtuff()
 {
   int end_time=0;
 
@@ -698,8 +663,7 @@ cleanup_shtuff()
   fprintf(stdout, "\nLocal end time: %s\n\n", ctime((time_t *)&end_time));
 }
 
-void 
-process_cleanup()
+void process_cleanup()
 {
   if (logfilefd>0)
     fclose(logfilefd);
@@ -707,8 +671,7 @@ process_cleanup()
   exit(0);
 }
 
-void 
-signal_proc()
+void signal_proc()
 {
   signal(SIGHUP, process_cleanup);
   signal(SIGTERM, process_cleanup);
@@ -716,8 +679,7 @@ signal_proc()
   signal(SIGQUIT, process_cleanup);
 }
 
-void 
-usage(char *progname)
+void usage(char *progname)
 {
   printf("%s\n", PROG_VER);
   printf("Usage: %s <options> <start path>\n", progname);
@@ -731,13 +693,12 @@ usage(char *progname)
   printf("    -t <1 or 2>\t   Check if the pattern follows either a Track 1 \n\t\t   or 2 format\n");
   printf("    -T\t\t   Check for both Track 1 and Track 2 patterns\n");
 
-  printf("    -h\t\t   This stuff\n\n");
-  printf("Please see the README file for a description of how this program works.\n\n");
+  printf("    -h\t\t   Usage information\n\n");
+  printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
 }
 
-int 
-open_logfile()
+int open_logfile()
 {
   errno = 0;
   if (logfilename!=NULL)
@@ -766,15 +727,14 @@ int check_dir (char *name)
     return (0);
 }
 
-int 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   struct stat	ffstat;
-  char		*inputstr = NULL;
-  char		*inbuf = NULL;
-  char		*tracktype_str=NULL;
-  char		tmpbuf[4096];
-  int		inlen = 0, err=0, c=0;
+  char  *inputstr = NULL;
+  char  *inbuf = NULL;
+  char  *tracktype_str=NULL;
+  char  tmpbuf[4096];
+  int   inlen = 0, err=0, c=0;
 
   if (argc < 2)
     usage(argv[0]);
@@ -837,7 +797,7 @@ main(int argc, char *argv[])
   signal_proc();
 
   init_time = time(NULL);
-  printf("\n\t\t%s\n", PROG_VER);
+  printf("\n%s\n", PROG_VER);
   printf("\nLocal start time: %s\n",ctime((time_t *)&init_time));
   if (check_dir(inbuf)) 
   {
@@ -864,7 +824,6 @@ main(int argc, char *argv[])
 
     if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG))
     {
-
       memset(&tmpbuf, '\0', 4096);
       if (escape_space(inbuf, tmpbuf) == 0)
       {
@@ -897,7 +856,6 @@ main(int argc, char *argv[])
         inbuf[strlen(inbuf)] = '/';
 #endif
       proc_dir_list(inbuf);
-
     }
     else
       fprintf(stderr, "main: Unknown mode returned-> %x\n", ffstat.st_mode);

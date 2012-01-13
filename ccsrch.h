@@ -1,7 +1,8 @@
 /*
- * ccsrch (c) 2007 Mike Beekey  - zaphod2718@yahoo.com
- * All rights reserved
- *
+ * ccsrch (c) 2012 Adam Caudill <adam@adamcaudill.com>
+ *        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
+ * 
+ * All rights reserved.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,7 +37,7 @@
   #define SIGQUIT 3
 #endif
 
-#define PROG_VER "ccsrch 1.0.3 (c) 2007 zaphod2718@yahoo.com"
+#define PROG_VER "ccsrch 1.0.4 (c) 2012 Adam Caudill <adam@adamcaudill>\n             (c) 2007 Mike Beekey <zaphod2718@yahoo.com>"
 
 #define MDBUFSIZE 512
 #define MAXPATH 2048
