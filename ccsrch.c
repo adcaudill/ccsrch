@@ -509,9 +509,9 @@ int proc_dir_list(char *instr)
     {
       strncat(curr_path, "/", MAXPATH);
       proc_dir_list(curr_path);
-    } else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG))
+    } 
+    else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG))
     {
-
       memset(&tmpbuf, '\0', 4096);
       if (escape_space(curr_path, tmpbuf) == 0)
       {
