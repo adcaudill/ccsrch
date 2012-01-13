@@ -29,6 +29,7 @@ Usage: ./ccsrch <options> <start path>
     -c             Show a count of hits per file (only when using -o)
     -l N           Limits the number of results from a single file before going
                    on to the next file.
+    -n <list>      File extensions to exclude (i.e .dll,.exe)
     -h             Usage information
 ```
 
@@ -148,6 +149,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 * Added option to output the file name, and how many hits were found to the console when using -o (see -c in usage).
 * Added option to limit the number of results from a single file before going on to the next file (see -l in usage).
+* Added option to exclude certain file types from the scan (see -n in usage).
 
 1.0.3 (Aug. 28, 2007):
 

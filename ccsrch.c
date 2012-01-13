@@ -57,6 +57,7 @@ char   lastfilename[MAXPATH];
 int    filename_pan_count=0;
 int    file_hit_count=0;
 int    limit_file_results=0;
+char   *exclude_extensions;
 
 void initialize_buffer()
 {
@@ -527,22 +528,25 @@ int proc_dir_list(char *instr)
         //rest file_hit_count so we can keep track of many hits each file has
         file_hit_count = 0;
         
-        /*
-         * kludge, need to clean this up
-         * later else any string matching in the path returns non NULL
-         */
-        if (logfilename != NULL)
-          if (strstr(curr_path, logfilename) != NULL)
-            fprintf(stderr, "We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", curr_path);
-          else
-          {
-            ccsrch(curr_path);
-            if (file_hit_count > 0 && print_file_hit_count == 1)
-              fprintf(stdout, "%s: %d hits\n", curr_path, file_hit_count);
-          }
-        else
+        if (is_allowed_file_type(curr_path) == 0)
         {
-          ccsrch(curr_path);
+	        /*
+	         * kludge, need to clean this up
+	         * later else any string matching in the path returns non NULL
+	         */
+	        if (logfilename != NULL)
+	          if (strstr(curr_path, logfilename) != NULL)
+	            fprintf(stderr, "We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", curr_path);
+	          else
+	          {
+	            ccsrch(curr_path);
+	            if (file_hit_count > 0 && print_file_hit_count == 1)
+	              fprintf(stdout, "%s: %d hits\n", curr_path, file_hit_count);
+	          }
+	        else
+	        {
+	          ccsrch(curr_path);
+	        }
         }
       }
     }
@@ -708,6 +712,7 @@ void usage(char *progname)
   printf("    -T\t\t   Check for both Track 1 and Track 2 patterns\n");
   printf("    -c\t\t   Show a count of hits per file (only when using -o)\n");
   printf("    -l N\t   Limits the number of results from a single file before going\n\t\t   on to the next file.\n");
+  printf("    -n <list>      File extensions to exclude (i.e .dll,.exe)\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
@@ -742,6 +747,21 @@ int check_dir (char *name)
     return (0);
 }
 
+int is_allowed_file_type (char *name)
+{
+	if(strstr(exclude_extensions, get_filename_ext(name)))
+		return (1);
+	else
+		return (0);
+}
+
+const char *get_filename_ext(const char *filename) 
+{
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return (dot + 1);
+}
+
 int main(int argc, char *argv[])
 {
   struct stat	ffstat;
@@ -755,7 +775,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:cl:")) != -1)
+  while ((c = getopt(argc, argv,"befjt:To:cl:n:")) != -1)
   {
     switch (c)
     {
@@ -798,6 +818,9 @@ int main(int argc, char *argv[])
     	  limit_file_results = limit_arg;
     	else
     		usage(argv[0]);
+    	break;
+    case 'n':
+    	exclude_extensions = optarg;
     	break;
     case 'h':
     default:
