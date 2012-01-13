@@ -749,7 +749,7 @@ int check_dir (char *name)
 
 int is_allowed_file_type (char *name)
 {
-	char delim[] = "|";
+	char delim[] = ",";
 	char *exclude = NULL;
 	char *result = NULL;
 	char *ext = NULL;
