@@ -74,8 +74,8 @@ card numbers:
 **Prefix Logic**  
 The following prefixes are used to validate the potential card numbers that have passed the mod 10 (Luhn) algorithm check.
 
-Original Sources for Credit Card Prefixes:
-http://javascript.internet.com/forms/val-credit-card.html
+Original Sources for Credit Card Prefixes:  
+http://javascript.internet.com/forms/val-credit-card.html  
 http://www.erikandanna.com/Business/CreditCards/credit_card_authorization.htm
 
 ### Logic Checks
