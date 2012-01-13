@@ -142,6 +142,10 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 ### Revisions
 
+1.0.4 (In Development):
+
+* Added option to output the file name, and how many hits were found to the console when using -o (see -c in usage).
+
 1.0.3 (Aug. 28, 2007):
 
 * Added the ability to just output filenames of potential PAN data.
