@@ -298,7 +298,8 @@ int ccsrch(char *filename)
 
     while (ccsrch_index < cnt)
     {
-      if ((ccsrch_buf[ccsrch_index] > 47) && (ccsrch_buf[ccsrch_index] < 58))
+      //check to see if our data is 0...9 (based on ACSII value)
+      if ((ccsrch_buf[ccsrch_index] >= 48) && (ccsrch_buf[ccsrch_index] <= 57))
       {
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-48;
