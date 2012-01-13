@@ -760,7 +760,7 @@ int is_allowed_file_type (char *name)
 		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
 		strcpy(exclude, exclude_extensions);
 		
-		ext = get_filename_ext(name);
+		ext = strlwr(get_filename_ext(name));
 		if (ext != NULL && ext != "")
 		{
 			result = strtok(exclude, delim);
@@ -847,7 +847,7 @@ int main(int argc, char *argv[])
     		usage(argv[0]);
     	break;
     case 'n':
-    	exclude_extensions = optarg;
+    	exclude_extensions = strlwr(optarg);
     	break;
     case 'h':
     default:
