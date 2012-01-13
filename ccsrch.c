@@ -541,7 +541,7 @@ int proc_dir_list(char *instr)
 	          {
 	            ccsrch(curr_path);
 	            if (file_hit_count > 0 && print_file_hit_count == 1)
-	              fprintf(stdout, "%s: %d hits\n", curr_path, file_hit_count);
+	              printf("%s: %d hits\n", curr_path, file_hit_count);
 	          }
 	        else
 	        {
