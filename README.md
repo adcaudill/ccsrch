@@ -70,7 +70,7 @@ The following assumptions are made throughout the program searching for the
 card numbers:
 
 1. Cards can be a minimum of 14 numbers and up to 16 numbers.
-2. Card numbers must be contiguous. The only characters ignored when processing the files are carriage returns, new line feeds, and nulls.
+2. Card numbers must be contiguous. The only characters ignored when processing the files are dashes, carriage returns, new line feeds, and nulls.
 3. Files are treated as raw binary objects and processed one character at a time.
 4. Solo and Switch cards are not processed in the prefix search.
 5. Compressed or encoded files are NOT uncompressed or decoded in this version. These files should be identified separately and the program run on the decompressed or decoded versions.
@@ -120,11 +120,11 @@ Valid Prefixes: 36, 300, 301, 302, 303, 304, 305, 380, 381, 382, 383, 384, 385, 
 
 ### Known Issues
 
-One typical observation/complaint is the number of false positives that still come up.  You will need to manually review and remove these. Certain patterns will repeatedly come up which match all of the criteria for valid cards, but are clearly bogus.  If there are enough cries for help, I may add some additional sanity checks into the logic such as bank information. In addition, there are certain system files which clearly should not have cardholder data in them and can be ignored.  There may be an "ignore file list" in a new release to reduce the amount of stuff to go through, however this will impact the speed of the tool.
+One typical observation/complaint is the number of false positives that still come up.  You will need to manually review and remove these. Certain patterns will repeatedly come up which match all of the criteria for valid cards, but are clearly bogus. In addition, there are certain system files which clearly should not have cardholder data in them and can be ignored.  There may be an "ignore file list" in a new release to reduce the amount of stuff to go through, however this will impact the speed of the tool.
 
 Note that since this program opens up each file and processes it, obviously the access time (in epoch seconds) will change.  If you are going to do forensics, one assumes that you have already collected an image following standard forensic practices and either have already collected and preserved the MAC times, or are using this tool on a copy of the image.
 
-For the track data search feature, the tool just examines the preceding characters before the valid credit card number and either the delimiter, or the delimeter and the characters (e.g. expiration date) following the credit card number.  This public release does not perform a full pattern match using the Track 1 or Track 2 formats.
+For the track data search feature, the tool just examines the preceding characters before the valid credit card number and either the delimiter, or the delimeter and the characters (e.g. expiration date) following the credit card number.
 
 We have found that for some POS software log files are generated that not only wrap across multiple lines, but insert hex representations of the ASCII values of the PAN data as well. Furthermore, these log files may contain track data. Remember that the only way that ccsrch will find the PAN data and track data is if it is contiguous. In certain instances you may luck out because the log files will contain an entire contigous PAN and will get flagged. We would encourage you to visually examine the files identified for confirmation. Introducing logic to capture all of the crazy possible storage representations of PAN and track data we've seen would make this tool a beast.
 
@@ -144,6 +144,11 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 `mingw32-make all`
 
 ### Revisions
+
+1.0.6 (In Development):
+
+* Fix for ignoring NULL, CR & LF.
+* Ignore dash when scanning (ASCII #45).
 
 1.0.5 (Jan. 13, 2012):
 
