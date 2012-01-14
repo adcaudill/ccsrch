@@ -252,14 +252,36 @@ int luhn_check(int len, long offset)
 
 
   nummod = total % 10;
-  if (nummod == 0)
+  if (nummod == 0 && is_last_digit_repeating(len) == 0)
   {
 #ifdef DEBUG
   printf("Luhn Check passed ***********************************\n");
 #endif
+    
     process_prefix(len, offset);
   }
+  
   return (nummod);
+}
+
+int is_last_digit_repeating(int len)
+{
+	int i = 0;
+	int last = cardbuf[len -1];
+	int ret = 0;
+	
+	for (i = len - 1; i > 7; i--)
+	{
+		if (cardbuf[i] == last)
+			ret = 1;
+		else
+		{
+			ret = 0;
+			break;
+		}
+	}
+	
+	return ret;
 }
 
 int ccsrch(char *filename)
