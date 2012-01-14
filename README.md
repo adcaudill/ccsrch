@@ -167,23 +167,23 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 * Removed the 13 digit VISA  number check.
 * Cleaned up some error and signal handling that varied across operating systems.
 
-1.0.2:
+1.0.2 (Dec. 12, 2005):
 
 * Added some additional track data format assumptions for track 1.
 
-1.0.1:
+1.0.1 (Sep. 27, 2005):
 
 * Added options for searching files for track data patterns.
 * Added the ability to select certain output options on the command line.
 
-0.9.3:
+0.9.3 (Jul. 28, 2005):
 
 * Removed extraneous calls.
 * Simplified parameter passing. 
 * Fixed non-portable type issues. 
 * Removed debugging info.
 
-0.9.1:
+0.9.1 (Jul. 15, 2005):
 
 * Initial release.
 
