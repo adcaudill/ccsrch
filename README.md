@@ -149,6 +149,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 * Fix for ignoring NULL, CR & LF.
 * Ignore dash when scanning (ASCII #45).
+* Exclude results with the last 8 digits repeating (very unlikely to be a real PAN).
 
 1.0.5 (Jan. 13, 2012):
 
