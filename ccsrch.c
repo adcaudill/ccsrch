@@ -316,10 +316,11 @@ int ccsrch(char *filename)
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-48;
         counter++;
       } 
-      else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) || (ccsrch_buf[ccsrch_index] == 13))
+      else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) || 
+      	(ccsrch_buf[ccsrch_index] == 13) || (ccsrch_buf[ccsrch_index] == 45))
       {
         /*
-         * we consider nulls, new lines, and carriage
+         * we consider dashes, nulls, new lines, and carriage
          * returns to be noise, so ingore those
          */
         check = 0;
