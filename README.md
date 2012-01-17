@@ -145,7 +145,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 ### Revisions
 
-1.0.6 (In Development):
+1.0.6 (Jan. 17, 2012):
 
 * Fix for ignoring NULL, CR & LF.
 * Ignore dash when scanning (ASCII #45).
