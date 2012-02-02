@@ -74,4 +74,4 @@ void usage (char *prog);
 char *get_filename_ext(char *filename);
 int is_allowed_file_type (char *name);
 int is_last_digit_repeating(int len);
-
+char* stolower(char* s);

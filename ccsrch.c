@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <ctype.h>
 #include "ccsrch.h"
 
 char   *logfilename = NULL;
@@ -781,7 +782,7 @@ int is_allowed_file_type (char *name)
 		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
 		strcpy(exclude, exclude_extensions);
 		
-		ext = strlwr(get_filename_ext(name));
+		ext = stolower(get_filename_ext(name));
 		if (ext != NULL && ext != "")
 		{
 			result = strtok(exclude, delim);
@@ -808,6 +809,13 @@ char *get_filename_ext(char *filename)
   char *dot = strrchr(slash, '.');
   if(!dot || dot == slash) return "";
   return (dot);
+}
+
+char* stolower(char* s)
+{
+  char* p = s;
+  while (*p = tolower( *p )) p++;
+  return s;
 }
 
 int main(int argc, char *argv[])
@@ -868,7 +876,7 @@ int main(int argc, char *argv[])
     		usage(argv[0]);
     	break;
     case 'n':
-    	exclude_extensions = strlwr(optarg);
+    	exclude_extensions = stolower(optarg);
     	break;
     case 'h':
     default:
