@@ -95,13 +95,13 @@ void print_result(char *cardname, int cardlen, long byte_offset)
   else
     snprintf(basebuf, MDBUFSIZE, "%s\t%s\t%s", currfilename, cardname, nbuf);
 
-  strncat(buf,basebuf,MAXPATH);
+  strncat(buf,basebuf,sizeof(buf)-strlen(buf)-1);
 
   if (print_byte_offset)
   {
     memset(&bytebuf,'\0',MDBUFSIZE);
     snprintf(bytebuf, MDBUFSIZE, "\t%ld", byte_offset);
-    strncat(buf,bytebuf,MAXPATH);
+    strncat(buf,bytebuf,sizeof(buf)-strlen(buf)-1);
   }
     if (print_julian_time)
     {
@@ -119,14 +119,14 @@ void print_result(char *cardname, int cardlen, long byte_offset)
 
       memset(&datebuf,'\0',MDBUFSIZE);
       snprintf(datebuf, MDBUFSIZE, "\t%s\t%s\t%s", mdatebuf,adatebuf,cdatebuf);
-      strncat(buf,datebuf,MAXPATH);
+      strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
     }
 
     if (print_epoch_time)
     {
       memset(&datebuf,'\0',MDBUFSIZE);
       snprintf(datebuf, MDBUFSIZE, "\t%ld\t%ld\t%ld", currfile_mtime,currfile_atime,currfile_ctime);
-      strncat(buf,datebuf,MAXPATH);
+      strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
     }
 
     if (tracksrch)
@@ -146,7 +146,7 @@ void print_result(char *cardname, int cardlen, long byte_offset)
           snprintf(trackbuf, MDBUFSIZE, "\tTRACK_2");
         }
       }
-      strncat(buf,trackbuf,MAXPATH);
+      strncat(buf,trackbuf,sizeof(buf)-strlen(buf)-1);
     }
   if (logfilefd != NULL)
     fprintf(logfilefd, "%s\n", buf);
@@ -696,9 +696,9 @@ void cleanup_shtuff()
   int end_time=0;
 
   end_time=time(NULL);
-  fprintf(stdout, "\n\nFiles searched ->\t\t%d\n", file_count);
+  fprintf(stdout, "\n\nFiles searched ->\t\t%ld\n", file_count);
   fprintf(stdout, "Search time (seconds) ->\t%d\n", ((int)time(NULL) - init_time));
-  fprintf(stdout, "Credit card matches->\t\t%d\n", total_count);
+  fprintf(stdout, "Credit card matches->\t\t%ld\n", total_count);
   if (tracksrch)
     fprintf(stdout, "Track data pattern matches->\t%d\n\n", trackdatacount);
   fprintf(stdout, "\nLocal end time: %s\n\n", ctime((time_t *)&end_time));
