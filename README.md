@@ -137,13 +137,22 @@ This tool has been successfully compiled and run on the following operating syst
 ### Building
 
 Linux/Unix:  
-`make all`
+```
+$ wget -O ccsrch.tar.gz https://github.com/adamcaudill/ccsrch/tarball/master
+$ tar -xvzf ccsrch.tar.gz 
+$ cd adamcaudill-ccsrch-<rev>/
+$ make all
+```
 
 Windows:  
 Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/))  
 `mingw32-make all`
 
 ### Revisions
+
+1.0.7 (In Development)
+
+* Fix compiling on *nix systems.
 
 1.0.6 (Jan. 17, 2012):
 
