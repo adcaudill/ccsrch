@@ -137,7 +137,8 @@ This tool has been successfully compiled and run on the following operating syst
 ### Building
 
 Linux/Unix:  
-```
+
+```none
 $ wget -O ccsrch.tar.gz https://github.com/adamcaudill/ccsrch/tarball/master
 $ tar -xvzf ccsrch.tar.gz 
 $ cd adamcaudill-ccsrch-<rev>/
