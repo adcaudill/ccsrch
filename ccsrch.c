@@ -253,7 +253,7 @@ int luhn_check(int len, long offset)
 
 
   nummod = total % 10;
-  if (nummod == 0 && is_last_digit_repeating(len) == 0)
+  if (nummod == 0 && has_repeating_digits(len) == 0)
   {
 #ifdef DEBUG
   printf("Luhn Check passed ***********************************\n");
@@ -265,20 +265,29 @@ int luhn_check(int len, long offset)
   return (nummod);
 }
 
-int is_last_digit_repeating(int len)
+int has_repeating_digits(int len)
 {
 	int i = 0;
-	int last = cardbuf[len -1];
+	int last = cardbuf[0];
 	int ret = 0;
+	int count = 0;
 	
-	for (i = len - 1; i > 7; i--)
+	for (i = 0; i < len; i++)
 	{
 		if (cardbuf[i] == last)
-			ret = 1;
+		{
+			count++;
+			
+			if (count == 7)
+			{
+				ret = 1;
+				break;
+			}
+		}
 		else
 		{
-			ret = 0;
-			break;
+			last = cardbuf[i];
+			count = 0;
 		}
 	}
 	
