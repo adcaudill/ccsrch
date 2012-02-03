@@ -253,7 +253,7 @@ int luhn_check(int len, long offset)
 
 
   nummod = total % 10;
-  if (nummod == 0 && has_repeating_digits(len) == 0)
+  if (nummod == 0 && has_repeating_digits(len) == 0 && is_same_repeating_digits(len) == 0)
   {
 #ifdef DEBUG
   printf("Luhn Check passed ***********************************\n");
@@ -288,6 +288,30 @@ int has_repeating_digits(int len)
 		{
 			last = cardbuf[i];
 			count = 0;
+		}
+	}
+	
+	return ret;
+}
+
+int is_same_repeating_digits(int len)
+{
+	int i = 0;
+	int first = cardbuf[0];
+	int sec = cardbuf[1];
+	int ret = 0;
+	int count = 0;
+	
+	for (i = 0; i < len; i = i + 2)
+	{
+		if (cardbuf[i] == first && (i+1 >= len || cardbuf[i+1] == sec))
+		{
+			ret = 1;
+		}
+		else
+		{
+			ret = 0;
+			break;
 		}
 	}
 	
