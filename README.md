@@ -155,6 +155,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 * Fix compiling on *nix systems.
 * Change to ignore any match that has 7 repeating digits.
+* Ignore results that are made up of the same two repeating digits.
 
 1.0.6 (Jan. 17, 2012):
 
