@@ -24,5 +24,7 @@ REM # file in place, it will pick that up so that you can see the reults.
 REM #
 mingw32-make clean
 mingw32-make all
-ccsrch -b -e -T ./
+REM ccsrch -b -T ./
+ccsrch -b -e -T c:\ -c -n .dll,.exe,.dng,.png,.nef,.bmp,.pdf,.wmv,.rtf,.msi,.zip,.7z,.tiff,.tif,.cab,.psd,.jpg,.gif,.jar -o out.txt
+REM ccsrch -b -e -T C:\ -c -l 4 -n .dll,.exe -o NUL
 pause
