@@ -27,6 +27,7 @@ Usage: ./ccsrch <options> <start path>
                    or 2 format
     -T             Check for both Track 1 and Track 2 patterns
     -c             Show a count of hits per file (only when using -o)
+    -s             Show live status information (only when using -o)
     -l N           Limits the number of results from a single file before going
                    on to the next file.
     -n <list>      File extensions to exclude (i.e .dll,.exe)
@@ -150,6 +151,10 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 `mingw32-make all`
 
 ### Revisions
+
+1.0.8 (In Development)
+
+* Add a new status display, provides a live view of what's happening.
 
 1.0.7 (Feb. 29, 2012)
 

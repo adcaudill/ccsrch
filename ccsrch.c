@@ -59,6 +59,9 @@ int    filename_pan_count=0;
 int    file_hit_count=0;
 int    limit_file_results=0;
 char   *exclude_extensions;
+int    newstatus = 0;
+int    status_lastupdate = 0;
+int    status_msglength = 0;
 
 void initialize_buffer()
 {
@@ -422,6 +425,11 @@ int ccsrch(char *filename)
       byte_offset++;
       ccsrch_index++;
       
+      if (newstatus == 1)
+      {
+      	update_status(currfilename, byte_offset);
+      }
+      
       //check to see if we've hit the limit for the current file
       if (limit_file_results > 0 && file_hit_count >= limit_file_results)
     	  limit_exceeded = 1;
@@ -766,6 +774,7 @@ void usage(char *progname)
   printf("    -t <1 or 2>\t   Check if the pattern follows either a Track 1 \n\t\t   or 2 format\n");
   printf("    -T\t\t   Check for both Track 1 and Track 2 patterns\n");
   printf("    -c\t\t   Show a count of hits per file (only when using -o)\n");
+  printf("    -s\t\t   Show live status information (only when using -o)\n");
   printf("    -l N\t   Limits the number of results from a single file before going\n\t\t   on to the next file.\n");
   printf("    -n <list>      File extensions to exclude (i.e .dll,.exe)\n");
   printf("    -h\t\t   Usage information\n\n");
@@ -854,6 +863,42 @@ char* stolower(char* s)
   return s;
 }
 
+void update_status(char *filename, int position)
+{
+	int i = 0;
+	struct tm *current;
+	time_t now;
+	char msgbuffer[512];
+	char *fn;
+
+	//if ((int)time(NULL) > status_lastupdate)
+	if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate)
+	{ 
+    printf("%*s\r", status_msglength, " ");
+    
+    time(&now);
+	  current = localtime(&now);
+	  
+	  fn = strrchr(filename, '/');
+	  
+	  if (fn == NULL)
+	  	fn = filename;
+	  else
+	    fn++;
+    
+    status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r", 
+      current->tm_hour, current->tm_min, current->tm_sec, 
+      fn, 
+      (position / 1024) / 1024);
+    
+    printf("%s", msgbuffer);
+    
+    fflush(stdout);
+    
+    status_lastupdate = time(NULL);
+	}
+}
+
 int main(int argc, char *argv[])
 {
   struct stat	ffstat;
@@ -867,7 +912,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:cl:n:")) != -1)
+  while ((c = getopt(argc, argv,"befjt:To:cl:n:s")) != -1)
   {
     switch (c)
     {
@@ -914,12 +959,30 @@ int main(int argc, char *argv[])
     case 'n':
     	exclude_extensions = stolower(optarg);
     	break;
+    case 's':
+    	newstatus = 1;
+
+    	break;
     case 'h':
     default:
       usage(argv[0]);
       break;
     }
   } 
+
+  //do some cleanup to make sure that invalid options don't get combined
+  if (logfilename != NULL)
+  {
+    if (newstatus == 1)
+    {
+    	print_file_hit_count = 0;
+    }
+  }
+  else
+  {
+  	newstatus = 0;
+  	print_file_hit_count = 0;
+  }
 
   inputstr = argv[optind];
   if (inputstr == NULL)
