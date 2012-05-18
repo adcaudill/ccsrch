@@ -152,7 +152,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 ### Revisions
 
-1.0.8 (In Development)
+1.0.8 (May 15, 2012)
 
 * Add a new status display, provides a live view of what's happening.
 
