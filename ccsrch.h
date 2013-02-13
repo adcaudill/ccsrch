@@ -37,7 +37,7 @@
   #define SIGQUIT 3
 #endif
 
-#define PROG_VER "ccsrch 1.0.8 (c) 2012 Adam Caudill <adam@adamcaudill>\n             (c) 2007 Mike Beekey <zaphod2718@yahoo.com>"
+#define PROG_VER "ccsrch 1.0.8 (c) 2012 Adam Caudill <adam@adamcaudill.com>\n             (c) 2007 Mike Beekey <zaphod2718@yahoo.com>"
 
 #define MDBUFSIZE 512
 #define MAXPATH 2048
