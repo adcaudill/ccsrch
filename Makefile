@@ -24,12 +24,20 @@
 
 CC	=gcc
 INCL	= -I./
-CFLAGS	=-O2 -static
-LDFLAGS	=-s
 OBJS=  ccsrch.o
 LIBSDIR	=  -L./
 LIBS	= 
 PROGS	=ccsrch
+
+#this hack is to support OSX
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+  CFLAGS	=-O2
+  LDFLAGS	=
+else
+  CFLAGS	=-O2 -static
+  LDFLAGS	=-s
+endif
 
 all:	${PROGS}
 
