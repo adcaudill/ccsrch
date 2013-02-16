@@ -156,7 +156,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 * [v1.0.8 - OSX-Intel-64](http://adamcaudill.com/files/ccsrch-1.0.8-osx_intel.zip)
 * [v1.0.8b1 - Win32](http://adamcaudill.com/files/ccsrch-1.0.8beta1.zip)
 * [v1.0.7 - Win32](http://adamcaudill.com/files/ccsrch-1.0.7.zip)
-* [v1.0.7 - Win32](http://adamcaudill.com/files/ccsrch-1.0.6.zip)
+* [v1.0.6 - Win32](http://adamcaudill.com/files/ccsrch-1.0.6.zip)
 
 ### Revisions
 
