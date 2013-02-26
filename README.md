@@ -4,8 +4,8 @@ CCSRCH is a cross-platform tool for searching filesystems for credit card inform
 
 ### Copyright
 
-Copyright (c) 2012 Adam Caudill <adam@adamcaudill.com>  
-Copyright (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
+Copyright (c) 2012 Adam Caudill (adam@adamcaudill.com)
+Copyright (c) 2007 Mike Beekey (zaphod2718@yahoo.com)
 
 This application is licensed under the GNU General Public License (see below & COPYING).
 
@@ -13,7 +13,7 @@ This project is a fork of CCSRCH as maintained by Mike Beekey at: http://sourcef
 
 ### Using CCSRCH
 
-```none
+```
 Usage: ./ccsrch <options> <start path>
   where <options> are:
     -b             Add the byte offset into the file of the number
@@ -85,7 +85,7 @@ http://www.erikandanna.com/Business/CreditCards/credit_card_authorization.htm
 
 ### Logic Checks
 
-```none
+```
 Card Type: MasterCard
 Valid Length: 16
 Valid Prefixes: 51, 52, 53, 54, 55
@@ -139,7 +139,7 @@ This tool has been successfully compiled and run on the following operating syst
 
 Linux/Unix/Mac OSX(Intel):  
 
-```none
+```
 $ wget -O ccsrch.tar.gz https://github.com/adamcaudill/ccsrch/tarball/master
 $ tar -xvzf ccsrch.tar.gz 
 $ cd adamcaudill-ccsrch-<rev>/
@@ -150,7 +150,7 @@ Windows:
 Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/))  
 `mingw32-make all`
 
-### Downloads
+### <a id="downloads"></a>Downloads
 
 * [v1.0.8 - Win32](http://adamcaudill.com/files/ccsrch-1.0.8-win32.zip)
 * [v1.0.8 - OSX-Intel-64](http://adamcaudill.com/files/ccsrch-1.0.8-osx_intel.zip)
