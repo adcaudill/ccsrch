@@ -825,7 +825,7 @@ int is_allowed_file_type (char *name)
 		strcpy(exclude, exclude_extensions);
 		
 		ext = stolower(get_filename_ext(name));
-		if (ext != NULL && ext != "")
+		if (ext != NULL && ext[0] != '\0')
 		{
 			result = strtok(exclude, delim);
 			while(result != NULL)
