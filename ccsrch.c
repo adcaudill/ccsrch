@@ -367,7 +367,7 @@ int ccsrch(char *filename)
 
     while (ccsrch_index < cnt && limit_exceeded == 0)
     {
-      //check to see if our data is 0...9 (based on ACSII value)
+      /* check to see if our data is 0...9 (based on ACSII value) */
       if ((ccsrch_buf[ccsrch_index] >= 48) && (ccsrch_buf[ccsrch_index] <= 57))
       {
         check = 1;
@@ -429,7 +429,7 @@ int ccsrch(char *filename)
       	update_status(currfilename, byte_offset);
       }
       
-      //check to see if we've hit the limit for the current file
+      /* check to see if we've hit the limit for the current file */
       if (limit_file_results > 0 && file_hit_count >= limit_file_results)
     	  limit_exceeded = 1;
     }
@@ -587,7 +587,7 @@ int proc_dir_list(char *instr)
       memset(&tmpbuf, '\0', 4096);
       if (escape_space(curr_path, tmpbuf) == 0)
       {
-        //rest file_hit_count so we can keep track of many hits each file has
+        /* rest file_hit_count so we can keep track of many hits each file has */
         file_hit_count = 0;
         
         if (is_allowed_file_type(curr_path) == 0)
@@ -869,7 +869,7 @@ void update_status(char *filename, int position)
 	char msgbuffer[512];
 	char *fn;
 
-	//if ((int)time(NULL) > status_lastupdate)
+	/* if ((int)time(NULL) > status_lastupdate) */
 	if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate)
 	{ 
     printf("%*s\r", status_msglength, " ");
@@ -968,7 +968,7 @@ int main(int argc, char *argv[])
     }
   } 
 
-  //do some cleanup to make sure that invalid options don't get combined
+  /* do some cleanup to make sure that invalid options don't get combined */
   if (logfilename != NULL)
   {
     if (newstatus == 1)
