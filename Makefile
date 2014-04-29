@@ -22,7 +22,7 @@
 # Makefile for ccsrch
 #
 
-CC	=gcc
+CC	?= gcc
 INCL	= -I./
 OBJS=  ccsrch.o
 LIBSDIR	=  -L./
