@@ -1,5 +1,5 @@
 /*
- * ccsrch (c) 2012 Adam Caudill <adam@adamcaudill.com>
+ * ccsrch (c) 2012-2014 Adam Caudill <adam@adamcaudill.com>
  *        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
  * 
  * All rights reserved.
