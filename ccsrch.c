@@ -746,7 +746,7 @@ void cleanup_shtuff()
 
 void process_cleanup()
 {
-  if (logfilefd>0)
+  if (logfilefd != NULL)
     fclose(logfilefd);
   cleanup_shtuff();
   exit(0);
