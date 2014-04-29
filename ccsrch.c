@@ -854,10 +854,11 @@ char *get_filename_ext(char *filename)
 
 char* stolower(char* s)
 {
+  char* p = s;
+  
   if (strlen(s) == 0)
   	return s;
   
-  char* p = s;
   while ((*p = tolower( *p ))) p++;
   return s;
 }
