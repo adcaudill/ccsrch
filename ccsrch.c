@@ -303,7 +303,6 @@ int is_same_repeating_digits(int len)
 	int first = cardbuf[0];
 	int sec = cardbuf[1];
 	int ret = 0;
-	int count = 0;
 	
 	for (i = 0; i < len; i = i + 2)
 	{
@@ -865,7 +864,6 @@ char* stolower(char* s)
 
 void update_status(char *filename, int position)
 {
-	int i = 0;
 	struct tm *current;
 	time_t now;
 	char msgbuffer[512];
