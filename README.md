@@ -1,5 +1,7 @@
 # CCSRCH
 
+[![Build Status](https://travis-ci.org/adamcaudill/ccsrch.svg?branch=master)](https://travis-ci.org/adamcaudill/ccsrch)
+
 CCSRCH is a cross-platform tool for searching filesystems for credit card information.
 
 ### Copyright
