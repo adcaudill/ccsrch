@@ -1,5 +1,5 @@
 #
-# ccsrch (c) 2012 Adam Caudill <adam@adamcaudill.com>
+# ccsrch (c) 2012 - 2014 Adam Caudill <adam@adamcaudill.com>
 #        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
 # All rights reserved
 #
@@ -39,11 +39,14 @@ else
   LDFLAGS	=-s
 endif
 
+strict: CFLAGS += -pedantic -Wall -Werror
+
 all:	${PROGS}
 
 ccsrch:	${OBJS}
 	${CC} ${CFLAGS} ${INCL} ${LDFLAGS} ${OBJS} ${LIBSDIR} ${LIBS} -o ccsrch
-	
+
+strict:	${PROGS}
 
 clean:
 	rm -f core *.core ${PROGS} ${OBJS} ccsrch.exe
