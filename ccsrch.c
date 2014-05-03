@@ -1,23 +1,23 @@
 /*
  * ccsrch (c) 2012-2014 Adam Caudill <adam@adamcaudill.com>
  *        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
- * 
+ *
  * All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, write to the Free Software Foundation, Inc., 59
  * Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- * 
+ *
  */
 
 #include <stdio.h>
@@ -117,7 +117,7 @@ void print_result(char *cardname, int cardlen, long byte_offset)
 	    memset(&adatebuf,'\0',CARDTYPELEN);
 	    strncpy(adatebuf,ctime((time_t *)&currfile_atime),CARDTYPELEN);
 	    adatebuf[strlen(adatebuf)-1]='\0';
-	
+
 	    memset(&cdatebuf,'\0',CARDTYPELEN);
 	    strncpy(cdatebuf,ctime((time_t *)&currfile_ctime),CARDTYPELEN);
 	    cdatebuf[strlen(cdatebuf)-1]='\0';
@@ -263,10 +263,10 @@ int luhn_check(int len, long offset)
 #ifdef DEBUG
   printf("Luhn Check passed ***********************************\n");
 #endif
-    
+
     process_prefix(len, offset);
   }
-  
+
   return (nummod);
 }
 
@@ -276,13 +276,13 @@ int has_repeating_digits(int len)
 	int last = cardbuf[0];
 	int ret = 0;
 	int count = 0;
-	
+
 	for (i = 0; i < len; i++)
 	{
 		if (cardbuf[i] == last)
 		{
 			count++;
-			
+
 			if (count == 7)
 			{
 				ret = 1;
@@ -295,7 +295,7 @@ int has_repeating_digits(int len)
 			count = 0;
 		}
 	}
-	
+
 	return ret;
 }
 
@@ -305,7 +305,7 @@ int is_same_repeating_digits(int len)
 	int first = cardbuf[0];
 	int sec = cardbuf[1];
 	int ret = 0;
-	
+
 	for (i = 0; i < len; i = i + 2)
 	{
 		if (cardbuf[i] == first && (i+1 >= len || cardbuf[i+1] == sec))
@@ -318,7 +318,7 @@ int is_same_repeating_digits(int len)
 			break;
 		}
 	}
-	
+
 	return ret;
 }
 
@@ -333,7 +333,7 @@ int ccsrch(char *filename)
   int   total = 0;
   int   check = 0;
   int   limit_exceeded = 0;
-  
+
 #ifdef DEBUG
   printf("Processing file %s\n",filename);
 #endif
@@ -364,7 +364,7 @@ int ccsrch(char *filename)
     cnt = read(infd, &ccsrch_buf, BSIZE - 1);
     if (cnt <= 0)
       break;
-    	
+
     ccsrch_index = 0;
 
     while (ccsrch_index < cnt && limit_exceeded == 0)
@@ -375,8 +375,8 @@ int ccsrch(char *filename)
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-48;
         counter++;
-      } 
-      else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) || 
+      }
+      else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) ||
       	(ccsrch_buf[ccsrch_index] == 13) || (ccsrch_buf[ccsrch_index] == 45))
       {
         /*
@@ -392,7 +392,7 @@ int ccsrch(char *filename)
         counter=0;
       }
 
-      if (((counter > 12) && (counter < CARDSIZE)) && (check)) 
+      if (((counter > 12) && (counter < CARDSIZE)) && (check))
       {
         switch (counter)
         {
@@ -409,8 +409,8 @@ int ccsrch(char *filename)
           luhn_check(13,byte_offset-13);
           break;
         }
-      } 
-      else if ((counter == CARDSIZE) && (check)) 
+      }
+      else if ((counter == CARDSIZE) && (check))
       {
         for (k = 0; k < counter - 1; k++)
         {
@@ -425,12 +425,12 @@ int ccsrch(char *filename)
       }
       byte_offset++;
       ccsrch_index++;
-      
+
       if (newstatus == 1)
       {
       	update_status(currfilename, byte_offset);
       }
-      
+
       /* check to see if we've hit the limit for the current file */
       if (limit_file_results > 0 && file_hit_count >= limit_file_results)
     	  limit_exceeded = 1;
@@ -493,7 +493,7 @@ int get_file_stat(char *inputfile, struct stat * fileattr)
   filelen = strlen(inputfile);
   errno = 0;
   tmp2buf = (char *) malloc(filelen+1);
-  
+
   if (tmp2buf == NULL)
   {
     fprintf(stderr, "get_file_stat: can't allocate memory; errno=%d\n", errno);
@@ -557,7 +557,7 @@ int proc_dir_list(char *instr)
   errno = 0;
   while ((direntptr = readdir(dirptr)) != NULL)
   {
-    /* readdir give us everything and not necessarily in order. This 
+    /* readdir give us everything and not necessarily in order. This
        logic is just silly, but it works */
     if (((direntptr->d_name[0] == '.') &&
          (direntptr->d_name[1] == '\0')) ||
@@ -583,7 +583,7 @@ int proc_dir_list(char *instr)
     {
       strncat(curr_path, "/", MAXPATH);
       proc_dir_list(curr_path);
-    } 
+    }
     else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG))
     {
       memset(&tmpbuf, '\0', 4096);
@@ -591,7 +591,7 @@ int proc_dir_list(char *instr)
       {
         /* rest file_hit_count so we can keep track of many hits each file has */
         file_hit_count = 0;
-        
+
         if (is_allowed_file_type(curr_path) == 0)
         {
 	        /*
@@ -767,9 +767,9 @@ void usage(char *progname)
   printf("%s\n", PROG_VER);
   printf("Usage: %s <options> <start path>\n", progname);
   printf("  where <options> are:\n");
-  printf("    -b\t\t   Add the byte offset into the file of the number\n"); 
+  printf("    -b\t\t   Add the byte offset into the file of the number\n");
   printf("    -e\t\t   Include the Modify Access and Create times in terms \n\t\t   of seconds since the epoch\n");
-  printf("    -f\t\t   Only print the filename w/ potential PAN data\n"); 
+  printf("    -f\t\t   Only print the filename w/ potential PAN data\n");
   printf("    -j\t\t   Include the Modify Access and Create times in terms \n\t\t   of normal date/time\n");
   printf("    -o <filename>  Output the data to the file <filename> vs. standard out\n");
   printf("    -t <1 or 2>\t   Check if the pattern follows either a Track 1 \n\t\t   or 2 format\n");
@@ -801,7 +801,7 @@ int open_logfile()
 int check_dir (char *name)
 {
   DIR            *dirptr;
-  
+
   dirptr = opendir(name);
   if (dirptr!=NULL)
   {
@@ -819,12 +819,12 @@ int is_allowed_file_type (char *name)
 	char *result = NULL;
 	char *ext = NULL;
 	int ret = 0;
-	
+
 	if(exclude_extensions != NULL)
   {
 		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
 		strcpy(exclude, exclude_extensions);
-		
+
 		ext = stolower(get_filename_ext(name));
 		if (ext != NULL && ext[0] != '\0')
 		{
@@ -842,11 +842,11 @@ int is_allowed_file_type (char *name)
 		}
 		free(exclude);
   }
-	
+
 	return (ret);
 }
 
-char *get_filename_ext(char *filename) 
+char *get_filename_ext(char *filename)
 {
 	char *slash = strrchr(filename, '/');
   char *dot = strrchr(slash, '.');
@@ -857,10 +857,10 @@ char *get_filename_ext(char *filename)
 char* stolower(char* s)
 {
   char* p = s;
-  
+
   if (strlen(s) == 0)
   	return s;
-  
+
   while ((*p = tolower( *p ))) p++;
   return s;
 }
@@ -874,28 +874,28 @@ void update_status(char *filename, int position)
 
 	/* if ((int)time(NULL) > status_lastupdate) */
 	if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate)
-	{ 
+	{
     printf("%*s\r", status_msglength, " ");
-    
+
     time(&now);
 	  current = localtime(&now);
-	  
+
 	  fn = strrchr(filename, '/');
-	  
+
 	  if (fn == NULL)
 	  	fn = filename;
 	  else
 	    fn++;
-    
-    status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r", 
-      current->tm_hour, current->tm_min, current->tm_sec, 
-      fn, 
+
+    status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r",
+      current->tm_hour, current->tm_min, current->tm_sec,
+      fn,
       (position / 1024) / 1024);
-    
+
     printf("%s", msgbuffer);
-    
+
     fflush(stdout);
-    
+
     status_lastupdate = time(NULL);
 	}
 }
@@ -969,7 +969,7 @@ int main(int argc, char *argv[])
       usage(argv[0]);
       break;
     }
-  } 
+  }
 
   /* do some cleanup to make sure that invalid options don't get combined */
   if (logfilename != NULL)
@@ -1004,7 +1004,7 @@ int main(int argc, char *argv[])
   init_time = time(NULL);
   printf("\n%s\n", PROG_VER);
   printf("\nLocal start time: %s\n",ctime((time_t *)&init_time));
-  if (check_dir(inbuf)) 
+  if (check_dir(inbuf))
   {
 #ifdef WINDOWS
     if ((inbuf[strlen(inbuf) - 1]) != '\\')
