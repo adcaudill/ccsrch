@@ -91,7 +91,9 @@ void print_result(char *cardname, int cardlen, long byte_offset)
   memset(&buf,'\0',MAXPATH);
   memset(&basebuf,'\0',MDBUFSIZE);
 
-  /* MB we need to figure out how to update the count and spit out the final filename with the count.  ensure that it gets flushed out on the last match if you are doing a diff between previous filename and new filename */
+  /* MB we need to figure out how to update the count and spit out the final
+  filename with the count.  ensure that it gets flushed out on the last match
+  if you are doing a diff between previous filename and new filename */
 
   if (print_filename_only)
     snprintf(basebuf, MDBUFSIZE, "%s", currfilename);
