@@ -754,7 +754,7 @@ void check_diners_club_cb_14(long offset)
 
 void cleanup_shtuff()
 {
-  int end_time=0;
+  time_t end_time;
 
   end_time=time(NULL);
   fprintf(stdout, "\n\nFiles searched ->\t\t%ld\n", file_count);
@@ -762,7 +762,7 @@ void cleanup_shtuff()
   fprintf(stdout, "Credit card matches->\t\t%ld\n", total_count);
   if (tracksrch)
     fprintf(stdout, "Track data pattern matches->\t%d\n\n", trackdatacount);
-  fprintf(stdout, "\nLocal end time: %s\n\n", ctime((time_t *)&end_time));
+  fprintf(stdout, "\nLocal end time: %s\n\n", asctime(localtime(&end_time)));
 }
 
 void process_cleanup()
