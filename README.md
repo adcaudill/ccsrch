@@ -6,7 +6,8 @@ CCSRCH is a cross-platform tool for searching filesystems for credit card inform
 
 ### Copyright
 
-Copyright (c) 2012 Adam Caudill (adam@adamcaudill.com)
+Copyright (c) 2012-2014 Adam Caudill (adam@adamcaudill.com)
+
 Copyright (c) 2007 Mike Beekey (zaphod2718@yahoo.com)
 
 This application is licensed under the GNU General Public License (see below & COPYING).
@@ -33,6 +34,7 @@ Usage: ./ccsrch <options> <start path>
     -l N           Limits the number of results from a single file before going
                    on to the next file.
     -n <list>      File extensions to exclude (i.e .dll,.exe)
+    -m             Mask the PAN number.
     -h             Usage information
 ```
 
@@ -154,17 +156,19 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 
 ### <a id="downloads"></a>Downloads
 
-* [v1.0.8 - Win32](http://adamcaudill.com/files/ccsrch-1.0.8-win32.zip)
-* [v1.0.8 - OSX-Intel-64](http://adamcaudill.com/files/ccsrch-1.0.8-osx_intel.zip)
-* [v1.0.8b1 - Win32](http://adamcaudill.com/files/ccsrch-1.0.8beta1.zip)
-* [v1.0.7 - Win32](http://adamcaudill.com/files/ccsrch-1.0.7.zip)
-* [v1.0.6 - Win32](http://adamcaudill.com/files/ccsrch-1.0.6.zip)
+* [v1.0.8 - Win32](https://adamcaudill.com/files/ccsrch-1.0.8-win32.zip)
+* [v1.0.8 - OSX-Intel-64](https://adamcaudill.com/files/ccsrch-1.0.8-osx_intel.zip)
+* [v1.0.8b1 - Win32](https://adamcaudill.com/files/ccsrch-1.0.8beta1.zip)
+* [v1.0.7 - Win32](https://adamcaudill.com/files/ccsrch-1.0.7.zip)
+* [v1.0.6 - Win32](https://adamcaudill.com/files/ccsrch-1.0.6.zip)
 
 ### Revisions
 
 1.0.9 (In Progress)
 
 * Better support for building on OSX.
+* Added -m option to mask screen & log output.
+* Code cleanup.
 
 1.0.8 (May 15, 2012)
 
