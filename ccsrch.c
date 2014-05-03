@@ -62,12 +62,27 @@ char   *exclude_extensions;
 int    newstatus = 0;
 int    status_lastupdate = 0;
 int    status_msglength = 0;
+int    mask_card_number = 0;
 
 void initialize_buffer()
 {
   int	i=0;
   for (i=0; i<CARDSIZE; i++)
     cardbuf[i]=0;
+}
+
+void mask_pan(char s[])
+{
+  /* Make the PAN number; probably a better way to do this */
+  int j = 0;
+
+  while (s[j] != '\0'){
+    if (j > 3 && j < strlen(s) - 6) {
+      s[j] = '*';
+    }
+
+    j++;
+  }
 }
 
 void print_result(char *cardname, int cardlen, long byte_offset)
@@ -90,6 +105,10 @@ void print_result(char *cardname, int cardlen, long byte_offset)
 
   memset(&buf,'\0',MAXPATH);
   memset(&basebuf,'\0',MDBUFSIZE);
+  
+  /* Mask the card if specified */
+  if (mask_card_number)
+    mask_pan(nbuf);
 
   /* MB we need to figure out how to update the count and spit out the final
   filename with the count.  ensure that it gets flushed out on the last match
@@ -778,6 +797,7 @@ void usage(char *progname)
   printf("    -s\t\t   Show live status information (only when using -o)\n");
   printf("    -l N\t   Limits the number of results from a single file before going\n\t\t   on to the next file.\n");
   printf("    -n <list>      File extensions to exclude (i.e .dll,.exe)\n");
+  printf("    -m\t\t   Mask the PAN number.\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
@@ -913,7 +933,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:cl:n:s")) != -1)
+  while ((c = getopt(argc, argv,"befjt:To:cml:n:s")) != -1)
   {
     switch (c)
     {
@@ -950,6 +970,9 @@ int main(int argc, char *argv[])
     case 'c':
     	print_file_hit_count=1;
     	break;
+    case 'm':
+      mask_card_number=1;
+      break;
     case 'l':
     	limit_arg = atoi(optarg);
     	if (limit_arg > 0)
