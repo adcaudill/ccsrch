@@ -4,6 +4,8 @@
 
 CCSRCH is a cross-platform tool for searching filesystems for credit card information.
 
+Want to support development? Consider donating via Bitcoin to `14jumFDmuVkLiAt4TgyKt17SWHtPRbkcLr` - all donations, no matter how small are appreciated.
+
 ### Copyright
 
 Copyright (c) 2012-2014 Adam Caudill (adam@adamcaudill.com)
