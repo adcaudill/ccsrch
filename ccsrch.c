@@ -836,6 +836,7 @@ int is_allowed_file_type (char *name)
 {
 	char delim[] = ",";
 	char *exclude = NULL;
+	char *fname = NULL;
 	char *result = NULL;
 	char *ext = NULL;
 	int ret = 0;
@@ -844,8 +845,8 @@ int is_allowed_file_type (char *name)
   {
 		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
 		strcpy(exclude, exclude_extensions);
-
-		ext = stolower(get_filename_ext(name));
+		strcpy(fname, name);
+		ext = stolower(get_filename_ext(fname));
 		if (ext != NULL && ext[0] != '\0')
 		{
 			result = strtok(exclude, delim);
@@ -861,6 +862,7 @@ int is_allowed_file_type (char *name)
 			}
 		}
 		free(exclude);
+		free(fname);
   }
 
 	return (ret);
