@@ -171,6 +171,7 @@ Install [MinGW](http://www.mingw.org/) ([installer](http://sourceforge.net/proje
 * Better support for building on OSX.
 * Added -m option to mask screen & log output.
 * Code cleanup.
+* Bugfix: avoid lowercasing the file extension
 
 1.0.8 (May 15, 2012)
 
