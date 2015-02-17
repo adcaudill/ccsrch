@@ -845,6 +845,7 @@ int is_allowed_file_type (char *name)
   {
 		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
 		strcpy(exclude, exclude_extensions);
+		fname = malloc(sizeof(char) * strlen(name) + 1);
 		strcpy(fname, name);
 		ext = stolower(get_filename_ext(fname));
 		if (ext != NULL && ext[0] != '\0')
