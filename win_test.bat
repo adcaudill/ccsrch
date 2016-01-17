@@ -1,6 +1,6 @@
 @echo off
 REM #
-REM # ccsrch (c) 2012 Adam Caudill <adam@adamcaudill.com>
+REM # ccsrch (c) 2012-2016 Adam Caudill <adam@adamcaudill.com>
 REM # All rights reserved
 REM #
 REM #

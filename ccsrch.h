@@ -1,5 +1,5 @@
 /*
- * ccsrch (c) 2012-2014 Adam Caudill <adam@adamcaudill.com>
+ * ccsrch (c) 2012-2016 Adam Caudill <adam@adamcaudill.com>
  *        (c) 2007 Mike Beekey <zaphod2718@yahoo.com>
  * 
  * All rights reserved.
@@ -37,7 +37,7 @@
   #define SIGQUIT 3
 #endif
 
-#define PROG_VER "ccsrch 1.0.9 (c) 2012-2014 Adam Caudill <adam@adamcaudill.com>\n             (c) 2007 Mike Beekey <zaphod2718@yahoo.com>"
+#define PROG_VER "ccsrch 1.0.9 (c) 2012-2016 Adam Caudill <adam@adamcaudill.com>\n             (c) 2007 Mike Beekey <zaphod2718@yahoo.com>"
 
 #define MDBUFSIZE 512
 #define MAXPATH 2048

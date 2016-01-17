@@ -8,7 +8,7 @@ Want to support development? Consider donating via Bitcoin to `14jumFDmuVkLiAt4T
 
 ### Copyright
 
-Copyright (c) 2012-2014 Adam Caudill (adam@adamcaudill.com)
+Copyright (c) 2012-2016 Adam Caudill (adam@adamcaudill.com)
 
 Copyright (c) 2007 Mike Beekey (zaphod2718@yahoo.com)
 
