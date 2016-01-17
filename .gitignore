@@ -1,3 +1,10 @@
 *.exe
 *.o
 out.txt
+
+#clion stuff
+.idea/*.iml
+.idea/tasks.xml
+.idea/workspace.xml
+.idea/dictionaries
+.idea/shelf
