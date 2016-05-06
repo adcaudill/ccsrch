@@ -798,6 +798,7 @@ char *stolower(char *buf)
     return buf;
 
   while ((*ptr = tolower(*ptr))) ptr++;
+  return buf;
 }
 
 void update_status(char *filename, int position)
@@ -1000,7 +1001,7 @@ int main(int argc, char *argv[])
     if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG)) {
       memset(&tmpbuf, '\0', 4096);
       if (escape_space(inbuf, tmpbuf) == 0) {
-        if (logfilename != NULL)
+        if (logfilename != NULL) {
           if (strstr(inbuf, logfilename) != NULL) {
             fprintf(stderr, "main: We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", inbuf);
           } else {
@@ -1015,7 +1016,8 @@ int main(int argc, char *argv[])
 #endif
           ccsrch(inbuf);
         }
-      } else if ((ffstat.st_mode & S_IFMT) == S_IFDIR) {
+      }
+    } else if ((ffstat.st_mode & S_IFMT) == S_IFDIR) {
 #ifdef WINDOWS
       if ((inbuf[strlen(inbuf) - 1]) != '\\')
         inbuf[strlen(inbuf)] = '\\';
