@@ -425,7 +425,6 @@ int escape_space(char *infile, char *outfile)
   }
 
   newlen = filelen + spc + 1;
-  errno = 0;
   tmpbuf = (char *)malloc(newlen);
   if (tmpbuf == NULL) {
     fprintf(stderr, "escape_space: can't allocate memory; errno=%d\n", errno);
@@ -454,7 +453,6 @@ int get_file_stat(char *inputfile, struct stat *fileattr)
   int          filelen  = 0;
 
   filelen = strlen(inputfile);
-  errno = 0;
   tmp2buf = (char *) malloc(filelen+1);
 
   if (tmp2buf == NULL) {
@@ -492,9 +490,11 @@ int proc_dir_list(char *instr)
   int             err          = 0;
   char            tmpbuf[4096];
 
-  errno = 0;
+  if (instr == NULL)
+    return 1;
+
   dir_name_len = strlen(instr);
-  dirptr = opendir(instr);
+  dirptr       = opendir(instr);
 
 #ifdef DEBUG
   printf("Checking directory <%s>\n",instr);
@@ -504,7 +504,6 @@ int proc_dir_list(char *instr)
     fprintf(stderr, "proc_dir_list: Can't open dir %s; errno=%d\n", instr, errno);
     return 1;
   }
-  errno = 0;
   curr_path = (char *)malloc(MAXPATH + 1);
   if (curr_path == NULL) {
     fprintf(stderr, "proc_dir_list: Can't allocate enough space; errno=%d\n", errno);
@@ -513,31 +512,29 @@ int proc_dir_list(char *instr)
   }
   memset(curr_path, '\0', MAXPATH+1);
   strncpy(curr_path, instr, MAXPATH);
-  errno = 0;
+
   while ((direntptr = readdir(dirptr)) != NULL) {
     /* readdir give us everything and not necessarily in order. This
        logic is just silly, but it works */
-    if (((direntptr->d_name[0] == '.') &&
-         (direntptr->d_name[1] == '\0')) ||
-        ((direntptr->d_name[0] == '.') &&
-         (direntptr->d_name[1] == '.') &&
-         (direntptr->d_name[2] == '\0')))
+    if ((strcmp(direntptr->d_name, ".") == 0) ||
+        (strcmp(direntptr->d_name, "..") == 0))
       continue;
 
-    errno = 0;
-    strncat(curr_path, direntptr->d_name, MAXPATH);
+    snprintf(curr_path+strlen(curr_path), MAXPATH-strlen(curr_path), "%s", direntptr->d_name);
     err = get_file_stat(curr_path, &fstat);
 
     if (err == -1) {
-      if (errno == ENOENT)
+      if (errno == ENOENT) {
         fprintf(stderr, "proc_dir_list: file %s not found, can't stat\n", curr_path);
-      else
+      } else {
         fprintf(stderr, "proc_dir_list: Cannot stat file %s; errno=%d\n", curr_path, errno);
+      }
       closedir(dirptr);
+      free(curr_path);
       return 1;
     }
     if ((fstat.st_mode & S_IFMT) == S_IFDIR) {
-      strncat(curr_path, "/", MAXPATH);
+      snprintf(curr_path+strlen(curr_path), MAXPATH-strlen(curr_path), "/");
       proc_dir_list(curr_path);
     } else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG)) {
       memset(&tmpbuf, '\0', 4096);
@@ -568,7 +565,6 @@ int proc_dir_list(char *instr)
   }
 
   free(curr_path);
-
   closedir(dirptr);
   return 0;
 }
@@ -737,7 +733,6 @@ void usage(char *progname)
 
 int open_logfile()
 {
-  errno = 0;
   if (logfilename!=NULL) {
     logfilefd = fopen(logfilename, "a+");
     if (logfilefd == NULL) {
