@@ -182,9 +182,9 @@ int track1_srch(int cardlen)
 {
   /* [%:B:cardnum:^:name (first initial cap?, let's ignore the %)] */
   if ((ccsrch_buf[ccsrch_index+1] == '^')
-      && (ccsrch_buf[ccsrch_index-cardlen] == 66)
-      && (ccsrch_buf[ccsrch_index+2] > 64)
-      && (ccsrch_buf[ccsrch_index+2] < 91)) {
+      && (ccsrch_buf[ccsrch_index-cardlen] == 'B')
+      && (ccsrch_buf[ccsrch_index+2] > '@')
+      && (ccsrch_buf[ccsrch_index+2] < '[')) {
     trackdatacount++;
     return 1;
   } else {
@@ -195,16 +195,17 @@ int track1_srch(int cardlen)
 int track2_srch(int cardlen)
 {
   /* [;:cardnum:=:expir date(YYMM), we'll use the ; here] */
-  if (((ccsrch_buf[ccsrch_index+1] == '=') || (ccsrch_buf[ccsrch_index+1] == 68))
+  if (((ccsrch_buf[ccsrch_index+1] == '=') || (ccsrch_buf[ccsrch_index+1] == 'D'))
       && ((ccsrch_buf[ccsrch_index-cardlen] == ';')||
-      ((ccsrch_buf[ccsrch_index-cardlen] > 57) || (ccsrch_buf[ccsrch_index-cardlen] < 91)) )
-      && ((ccsrch_buf[ccsrch_index+2] > 47)
-      && (ccsrch_buf[ccsrch_index+2] < 58))
-      && ((ccsrch_buf[ccsrch_index+3] > 47)
-      && (ccsrch_buf[ccsrch_index+3] < 58))) {
+      ((ccsrch_buf[ccsrch_index-cardlen] > '9') || (ccsrch_buf[ccsrch_index-cardlen] < '[')) )
+      && ((ccsrch_buf[ccsrch_index+2] > '/')
+      && (ccsrch_buf[ccsrch_index+2] < ':'))
+      && ((ccsrch_buf[ccsrch_index+3] > '/')
+      && (ccsrch_buf[ccsrch_index+3] < ':'))) {
     trackdatacount++;
     return 1;
-  } else {
+  }
+  else {
     return 0;
   }
 }
