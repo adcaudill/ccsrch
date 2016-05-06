@@ -447,9 +447,8 @@ int escape_space(char *infile, char *outfile)
   return 0;
 }
 
-int get_file_stat(char *inputfile, struct stat * fileattr)
+int get_file_stat(char *inputfile, struct stat *fileattr)
 {
-  struct stat  ffattr;
   int          err      = 0;
   char         *tmp2buf = NULL;
   int          filelen  = 0;
@@ -466,7 +465,7 @@ int get_file_stat(char *inputfile, struct stat * fileattr)
   strncpy(tmp2buf, inputfile, filelen);
 
   errno=0;
-  err = stat(tmp2buf, &ffattr);
+  err = stat(tmp2buf, fileattr);
   if (err != 0) {
     if (errno == ENOENT) {
       fprintf(stderr, "get_file_stat: File %s not found, can't get stat info\n", inputfile);
@@ -476,10 +475,9 @@ int get_file_stat(char *inputfile, struct stat * fileattr)
     free(tmp2buf);
     return -1;
   }
-  memcpy(fileattr, &ffattr, sizeof(ffattr));
-  currfile_atime=ffattr.st_atime;
-  currfile_mtime=ffattr.st_mtime;
-  currfile_ctime=ffattr.st_ctime;
+  currfile_atime=fileattr->st_atime;
+  currfile_mtime=fileattr->st_mtime;
+  currfile_ctime=fileattr->st_ctime;
   free(tmp2buf);
   return 0;
 }
