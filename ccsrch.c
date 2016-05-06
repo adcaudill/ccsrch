@@ -57,7 +57,6 @@ int    tracksrch            = 0;
 int    tracktype1           = 0;
 int    tracktype2           = 0;
 int    trackdatacount       = 0;
-int    filename_pan_count   = 0;
 int    file_hit_count       = 0;
 int    limit_file_results   = 0;
 int    newstatus            = 0;
@@ -79,6 +78,38 @@ static void mask_pan(char *s)
   for (j=0; s[j]!='\0'; j++) {
     if (j > 3 && j < strlen(s) - 6)
       s[j] = '*';
+  }
+}
+
+static int track1_srch(int cardlen)
+{
+  /* [%:B:cardnum:^:name (first initial cap?, let's ignore the %)] */
+  if ((ccsrch_buf[ccsrch_index+1] == '^')
+      && (ccsrch_buf[ccsrch_index-cardlen] == 'B')
+      && (ccsrch_buf[ccsrch_index+2] > '@')
+      && (ccsrch_buf[ccsrch_index+2] < '[')) {
+    trackdatacount++;
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+static int track2_srch(int cardlen)
+{
+  /* [;:cardnum:=:expir date(YYMM), we'll use the ; here] */
+  if (((ccsrch_buf[ccsrch_index+1] == '=') || (ccsrch_buf[ccsrch_index+1] == 'D'))
+      && ((ccsrch_buf[ccsrch_index-cardlen] == ';')||
+      ((ccsrch_buf[ccsrch_index-cardlen] > '9') || (ccsrch_buf[ccsrch_index-cardlen] < '[')) )
+      && ((ccsrch_buf[ccsrch_index+2] > '/')
+      && (ccsrch_buf[ccsrch_index+2] < ':'))
+      && ((ccsrch_buf[ccsrch_index+3] > '/')
+      && (ccsrch_buf[ccsrch_index+3] < ':'))) {
+    trackdatacount++;
+    return 1;
+  }
+  else {
+    return 0;
   }
 }
 
@@ -176,39 +207,114 @@ static void print_result(char *cardname, int cardlen, long byte_offset)
   file_hit_count++;
 }
 
-int track1_srch(int cardlen)
+static void check_mastercard_16(long offset)
 {
-  /* [%:B:cardnum:^:name (first initial cap?, let's ignore the %)] */
-  if ((ccsrch_buf[ccsrch_index+1] == '^')
-      && (ccsrch_buf[ccsrch_index-cardlen] == 'B')
-      && (ccsrch_buf[ccsrch_index+2] > '@')
-      && (ccsrch_buf[ccsrch_index+2] < '[')) {
-    trackdatacount++;
-    return 1;
-  } else {
-    return 0;
-  }
+  char num2buf[7];
+  int  vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 3, "%d%d", cardbuf[0], cardbuf[1]);
+  vnum = atoi(num2buf);
+  if ((vnum > 50) && (vnum < 56))
+    print_result("MASTERCARD", 16, offset);
+
+  snprintf(num2buf, sizeof(num2buf), "%d%d%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3], cardbuf[4], cardbuf[5]);
+  vnum = atoi(num2buf);
+  if ((vnum >= 222100) && (vnum <= 272099))
+    print_result("MASTERCARD", 16, offset);
 }
 
-int track2_srch(int cardlen)
+static void check_visa_16(long offset)
 {
-  /* [;:cardnum:=:expir date(YYMM), we'll use the ; here] */
-  if (((ccsrch_buf[ccsrch_index+1] == '=') || (ccsrch_buf[ccsrch_index+1] == 'D'))
-      && ((ccsrch_buf[ccsrch_index-cardlen] == ';')||
-      ((ccsrch_buf[ccsrch_index-cardlen] > '9') || (ccsrch_buf[ccsrch_index-cardlen] < '[')) )
-      && ((ccsrch_buf[ccsrch_index+2] > '/')
-      && (ccsrch_buf[ccsrch_index+2] < ':'))
-      && ((ccsrch_buf[ccsrch_index+3] > '/')
-      && (ccsrch_buf[ccsrch_index+3] < ':'))) {
-    trackdatacount++;
-    return 1;
-  }
-  else {
-    return 0;
-  }
+  char  num2buf[2];
+  int   vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 2, "%d", cardbuf[0]);
+  vnum = atoi(num2buf);
+  if (vnum == 4)
+    print_result("VISA", 16, offset);
 }
 
-int process_prefix(int len, long offset)
+static void check_discover_16(long offset)
+{
+  char  num2buf[5];
+  int   vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
+  vnum = atoi(num2buf);
+  if (vnum == 6011)
+    print_result("DISCOVER", 16, offset);
+}
+
+static void check_jcb_16(long offset)
+{
+  char  num2buf[5];
+  int   vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
+  vnum = atoi(num2buf);
+  if ((vnum >= 3528) && (vnum <= 3589))
+    print_result("JCB", 16, offset);
+}
+
+static void check_amex_15(long offset)
+{
+  char  num2buf[3];
+  int   vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 3, "%d%d", cardbuf[0], cardbuf[1]);
+  vnum = atoi(num2buf);
+  if ((vnum == 34) || (vnum == 37))
+    print_result("AMEX", 15, offset);
+}
+
+static void check_enroute_15(long offset)
+{
+  char  num2buf[5];
+  int   vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
+  vnum = atoi(num2buf);
+  if ((vnum == 2014) || (vnum == 2149))
+    print_result("ENROUTE", 15, offset);
+}
+
+static void check_jcb_15(long offset)
+{
+  char  num2buf[5];
+  int   vnum = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
+  vnum = atoi(num2buf);
+  if ((vnum == 2131) || (vnum == 1800) || (vnum == 3528) || (vnum == 3529))
+    print_result("JCB", 15, offset);
+}
+
+static void check_diners_club_cb_14(long offset)
+{
+  char  num2buf[4];
+  char  num2buf2[3];
+  int   vnum = 0;
+  int   vnum2 = 0;
+
+  memset(&num2buf, 0, sizeof(num2buf));
+  memset(&num2buf2, 0, sizeof(num2buf2));
+  snprintf(num2buf, 4, "%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2]);
+  snprintf(num2buf2, 3, "%d%d", cardbuf[0], cardbuf[1]);
+  vnum = atoi(num2buf);
+  vnum2 = atoi(num2buf2);
+  if (((vnum > 299) && (vnum < 306)) || ((vnum > 379) && (vnum < 389)) || (vnum2 == 36) || 
+      ((vnum2 >= 38) && (vnum2 <=39)))
+    print_result("DINERS_CLUB_CARTE_BLANCHE", 14, offset);
+}
+
+static int process_prefix(int len, long offset)
 {
   switch (len) {
     case 16:
@@ -228,8 +334,7 @@ int process_prefix(int len, long offset)
   }
   return 0;
 }
-
-int luhn_check(int len, long offset)
+static int luhn_check(int len, long offset)
 {
   int i      = 0;
   int tmp    = 0;
@@ -266,46 +371,6 @@ int luhn_check(int len, long offset)
   return nummod;
 }
 
-int has_repeating_digits(int len)
-{
-	int i;
-	int last  = cardbuf[0];
-	int ret   = 0;
-	int count = 0;
-
-	for (i=0; i<len; i++) {
-		if (cardbuf[i] == last) {
-			count++;
-
-			if (count == 7)
-				return 1;
-		} else {
-			last = cardbuf[i];
-			count = 0;
-		}
-	}
-
-	return ret;
-}
-
-int is_same_repeating_digits(int len)
-{
-	int i;
-	int first = cardbuf[0];
-	int sec   = cardbuf[1];
-	int ret   = 0;
-
-	for (i=0; i<len; i+=2) {
-		if (cardbuf[i] == first && (i+1 >= len || cardbuf[i+1] == sec)) {
-			ret = 1;
-		} else {
-			return 0;
-		}
-	}
-
-	return ret;
-}
-
 static int is_ascii_buf(const char *buf, int len)
 {
   for (int i=0; i < len; i++) {
@@ -315,7 +380,53 @@ static int is_ascii_buf(const char *buf, int len)
   return 1;
 }
 
-int ccsrch(char *filename)
+static char *stolower(char *buf)
+{
+  char *ptr = buf;
+
+  if (buf == NULL || strlen(buf) == 0)
+    return buf;
+
+  while ((*ptr = tolower(*ptr))) ptr++;
+  return buf;
+}
+
+static void update_status(char *filename, int position)
+{
+  struct tm *current;
+  time_t     now;
+  char       msgbuffer[512];
+  char      *fn;
+
+  /* if ((int)time(NULL) > status_lastupdate) */
+  if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate) {
+    printf("%*s\r", status_msglength, " ");
+
+    time(&now);
+    current = localtime(&now);
+
+    fn = strrchr(filename, '/');
+
+    if (fn == NULL) {
+      fn = filename;
+    } else {
+      fn++;
+    }
+
+    status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r",
+      current->tm_hour, current->tm_min, current->tm_sec,
+      fn,
+      (position / 1024) / 1024);
+
+    printf("%s", msgbuffer);
+
+    fflush(stdout);
+
+    status_lastupdate = time(NULL);
+  }
+}
+
+static int ccsrch(char *filename)
 {
   FILE  *in            = NULL;
   int   cnt            = 0;
@@ -406,7 +517,7 @@ int ccsrch(char *filename)
   return total;
 }
 
-int escape_space(char *infile, char *outfile)
+static int escape_space(char *infile, char *outfile)
 {
   int    i       = 0;
   int    spc     = 0;
@@ -443,7 +554,7 @@ int escape_space(char *infile, char *outfile)
   return 0;
 }
 
-int get_file_stat(char *inputfile, struct stat *fileattr)
+static int get_file_stat(char *inputfile, struct stat *fileattr)
 {
   int          err      = 0;
   char         *tmp2buf = NULL;
@@ -477,7 +588,48 @@ int get_file_stat(char *inputfile, struct stat *fileattr)
   return 0;
 }
 
-int proc_dir_list(char *instr)
+static char *get_filename_ext(char *filename)
+{
+  char *slash = strrchr(filename, '/');
+  char *dot   = strrchr(slash, '.');
+  if(!dot || dot == slash)
+    return "";
+  return dot;
+}
+
+static int is_allowed_file_type(const char *name)
+{
+  char  delim[] = ",";
+  char *exclude = NULL;
+  char *fname   = NULL;
+  char *result  = NULL;
+  char *ext     = NULL;
+  int   ret     = 0;
+
+  if (exclude_extensions == NULL)
+    return 0;
+
+  exclude = strdup(exclude_extensions);
+  fname   = strdup(name);
+  ext     = get_filename_ext(fname);
+  stolower(ext);
+  if (ext != NULL && ext[0] != '\0') {
+    result = strtok(exclude, delim);
+    while (result != NULL) {
+      if (strcmp(result, ext) == 0) {
+        ret = 1;
+        break;
+      } else {
+        result = strtok(NULL, delim);
+      }
+    }
+  }
+  free(exclude);
+  free(fname);
+  return ret;
+}
+
+static int proc_dir_list(char *instr)
 {
   DIR            *dirptr;
   struct dirent  *direntptr;
@@ -566,114 +718,7 @@ int proc_dir_list(char *instr)
   return 0;
 }
 
-void check_mastercard_16(long offset)
-{
-  char num2buf[7];
-  int  vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 3, "%d%d", cardbuf[0], cardbuf[1]);
-  vnum = atoi(num2buf);
-  if ((vnum > 50) && (vnum < 56))
-    print_result("MASTERCARD", 16, offset);
-
-  snprintf(num2buf, sizeof(num2buf), "%d%d%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3], cardbuf[4], cardbuf[5]);
-  vnum = atoi(num2buf);
-  if ((vnum >= 222100) && (vnum <= 272099))
-    print_result("MASTERCARD", 16, offset);
-}
-
-void check_visa_16(long offset)
-{
-  char  num2buf[2];
-  int   vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 2, "%d", cardbuf[0]);
-  vnum = atoi(num2buf);
-  if (vnum == 4)
-    print_result("VISA", 16, offset);
-}
-
-void check_discover_16(long offset)
-{
-  char  num2buf[5];
-  int   vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
-  vnum = atoi(num2buf);
-  if (vnum == 6011)
-    print_result("DISCOVER", 16, offset);
-}
-
-void check_jcb_16(long offset)
-{
-  char  num2buf[5];
-  int   vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
-  vnum = atoi(num2buf);
-  if ((vnum >= 3528) && (vnum <= 3589))
-    print_result("JCB", 16, offset);
-}
-
-void check_amex_15(long offset)
-{
-  char  num2buf[3];
-  int   vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 3, "%d%d", cardbuf[0], cardbuf[1]);
-  vnum = atoi(num2buf);
-  if ((vnum == 34) || (vnum == 37))
-    print_result("AMEX", 15, offset);
-}
-
-void check_enroute_15(long offset)
-{
-  char  num2buf[5];
-  int   vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
-  vnum = atoi(num2buf);
-  if ((vnum == 2014) || (vnum == 2149))
-    print_result("ENROUTE", 15, offset);
-}
-
-void check_jcb_15(long offset)
-{
-  char  num2buf[5];
-  int   vnum = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
-  vnum = atoi(num2buf);
-  if ((vnum == 2131) || (vnum == 1800) || (vnum == 3528) || (vnum == 3529))
-    print_result("JCB", 15, offset);
-}
-
-void check_diners_club_cb_14(long offset)
-{
-  char  num2buf[4];
-  char  num2buf2[3];
-  int   vnum = 0;
-  int   vnum2 = 0;
-
-  memset(&num2buf, 0, sizeof(num2buf));
-  memset(&num2buf2, 0, sizeof(num2buf2));
-  snprintf(num2buf, 4, "%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2]);
-  snprintf(num2buf2, 3, "%d%d", cardbuf[0], cardbuf[1]);
-  vnum = atoi(num2buf);
-  vnum2 = atoi(num2buf2);
-  if (((vnum > 299) && (vnum < 306)) || ((vnum > 379) && (vnum < 389)) || (vnum2 == 36) || 
-      ((vnum2 >= 38) && (vnum2 <=39)))
-    print_result("DINERS_CLUB_CARTE_BLANCHE", 14, offset);
-}
-
-void cleanup_shtuff()
+static void cleanup_shtuff()
 {
   time_t end_time = time(NULL);
   printf("\n\nFiles searched ->\t\t%ld\n", file_count);
@@ -689,7 +734,7 @@ void cleanup_shtuff()
   exit(0);
 }
 
-void signal_proc()
+static void signal_proc()
 {
   signal(SIGHUP,  cleanup_shtuff);
   signal(SIGTERM, cleanup_shtuff);
@@ -697,7 +742,7 @@ void signal_proc()
   signal(SIGQUIT, cleanup_shtuff);
 }
 
-void usage(char *progname)
+static void usage(char *progname)
 {
   printf("%s\n", PROG_VER);
   printf("Usage: %s <options> <start path>\n", progname);
@@ -721,7 +766,7 @@ void usage(char *progname)
   exit(0);
 }
 
-int open_logfile()
+static int open_logfile()
 {
   if (logfilename!=NULL) {
     logfilefd = fopen(logfilename, "a+");
@@ -733,9 +778,9 @@ int open_logfile()
   return 0;
 }
 
-int check_dir (char *name)
+static int check_dir (char *name)
 {
-  DIR            *dirptr;
+  DIR *dirptr;
 
   dirptr = opendir(name);
   if (dirptr!=NULL) {
@@ -744,93 +789,6 @@ int check_dir (char *name)
   } else {
     return 0;
   }
-}
-
-int is_allowed_file_type(const char *name)
-{
-  char  delim[] = ",";
-  char *exclude = NULL;
-  char *fname   = NULL;
-  char *result  = NULL;
-  char *ext     = NULL;
-  int   ret     = 0;
-
-  if (exclude_extensions == NULL)
-    return 0;
-
-  exclude = strdup(exclude_extensions);
-  fname   = strdup(name);
-  ext     = get_filename_ext(fname);
-  stolower(ext);
-  if (ext != NULL && ext[0] != '\0') {
-    result = strtok(exclude, delim);
-    while (result != NULL) {
-      if (strcmp(result, ext) == 0) {
-        ret = 1;
-        break;
-      } else {
-        result = strtok(NULL, delim);
-      }
-    }
-  }
-  free(exclude);
-  free(fname);
-  return ret;
-}
-
-char *get_filename_ext(char *filename)
-{
-	char *slash = strrchr(filename, '/');
-  char *dot   = strrchr(slash, '.');
-  if(!dot || dot == slash)
-    return "";
-  return dot;
-}
-
-char *stolower(char *buf)
-{
-  char *ptr = buf;
-
-  if (buf == NULL || strlen(buf) == 0)
-    return buf;
-
-  while ((*ptr = tolower(*ptr))) ptr++;
-  return buf;
-}
-
-void update_status(char *filename, int position)
-{
-	struct tm *current;
-	time_t     now;
-	char       msgbuffer[512];
-	char      *fn;
-
-	/* if ((int)time(NULL) > status_lastupdate) */
-	if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate) {
-    printf("%*s\r", status_msglength, " ");
-
-    time(&now);
-	  current = localtime(&now);
-
-	  fn = strrchr(filename, '/');
-
-	  if (fn == NULL) {
-	  	fn = filename;
-    } else {
-	    fn++;
-    }
-
-    status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r",
-      current->tm_hour, current->tm_min, current->tm_sec,
-      fn,
-      (position / 1024) / 1024);
-
-    printf("%s", msgbuffer);
-
-    fflush(stdout);
-
-    status_lastupdate = time(NULL);
-	}
 }
 
 static char *read_ignore_list(const char *filename, size_t *len)

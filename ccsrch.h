@@ -46,33 +46,3 @@
 #define CARDSIZE 17
 
 extern int errno;
-
-int ccsrch (char *str);
-void check_mastercard_16(long offset);
-void check_visa_16(long offset);
-void check_discover_16(long offset);
-void check_jcb_16(long offset);
-void check_amex_15(long offset);
-void check_enroute_15(long offset);
-void check_jcb_15(long offset);
-void check_diners_club_cb_14(long offset);
-void check_visa_13(long offset);
-void cleanup_shtuff();
-int escape_space(char *infile, char *outfile);
-int get_file_stat(char *infile, struct stat *fattr);
-int luhn_check (int len, long offset);
-int open_logfile ();
-void print_num (int *buf, int len);
-int proc_dir_list (char *instr);
-void process_cleanup();
-int process_prefix(int len, long offset);
-void signal_proc();
-int track1_srch(int len);
-int track2_srch(int len);
-void usage (char *prog);
-char *get_filename_ext(char *filename);
-int is_allowed_file_type(const char *name);
-int has_repeating_digits(int len);
-int is_same_repeating_digits(int len);
-char* stolower(char* s);
-void update_status(char *filename, int position);
