@@ -380,7 +380,8 @@ static int luhn_check(int len, long offset)
 
 static int is_ascii_buf(const char *buf, int len)
 {
-  for (int i=0; i < len; i++) {
+  int i;
+  for (i=0; i < len; i++) {
     if (!isascii(buf[i]))
       return 0;
   }
@@ -818,7 +819,8 @@ static char *read_ignore_list(const char *filename, size_t *len)
 
 static void split_ignore_list(char *buf, size_t len)
 {
-  for (int i=0; i<len; i++) {
+  int i;
+  for (i=0; i<len; i++) {
     if (buf[i] == '\n')
       buf[i] = ' ';
   }
@@ -831,7 +833,6 @@ int main(int argc, char *argv[])
   char       *inbuf         = NULL;
   char       *tracktype_str = NULL;
   char        tmpbuf[BSIZE];
-  int         inlen          = 0;
   int         err            = 0;
   int         c              = 0;
   int         limit_arg      = 0;
@@ -920,8 +921,6 @@ int main(int argc, char *argv[])
   inputstr = argv[optind];
   if (inputstr == NULL)
     usage(argv[0]);
-
-  inlen = strlen(inputstr) + 1;
 
   if (open_logfile() < 0)
     exit(-1);
