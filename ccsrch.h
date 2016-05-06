@@ -63,7 +63,6 @@ int get_file_stat(char *infile, struct stat *fattr);
 int luhn_check (int len, long offset);
 int open_logfile ();
 void print_num (int *buf, int len);
-void print_result(char *str, int len, long offset);
 int proc_dir_list (char *instr);
 void process_cleanup();
 int process_prefix(int len, long offset);

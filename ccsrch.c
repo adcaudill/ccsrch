@@ -66,26 +66,23 @@ int    status_msglength     = 0;
 int    mask_card_number     = 0;
 int    limit_ascii          = 0;
 
-void initialize_buffer()
+static void initialize_buffer()
 {
   memset(cardbuf, 0, CARDSIZE);
 }
 
-void mask_pan(char s[])
+static void mask_pan(char *s)
 {
   /* Make the PAN number; probably a better way to do this */
-  int j = 0;
+  int j;
 
-  while (s[j] != '\0'){
-    if (j > 3 && j < strlen(s) - 6) {
+  for (j=0; s[j]!='\0'; j++) {
+    if (j > 3 && j < strlen(s) - 6)
       s[j] = '*';
-    }
-
-    j++;
   }
 }
 
-void print_result(char *cardname, int cardlen, long byte_offset)
+static void print_result(char *cardname, int cardlen, long byte_offset)
 {
   int		i = 0;
   char	nbuf[20];
