@@ -38,6 +38,7 @@ char   lastfilename[MAXPATH];
 char  *exclude_extensions;
 char  *logfilename          = NULL;
 char  *currfilename         = NULL;
+char  *ignore               = NULL;
 FILE  *logfilefd            = NULL;
 long   total_count          = 0;
 long   file_count           = 0;
@@ -100,6 +101,9 @@ void print_result(char *cardname, int cardlen, long byte_offset)
 
   for (i=0; i<cardlen; i++)
     nbuf[i] = cardbuf[i]+48;
+
+  if (ignore && strstr(ignore, nbuf) != NULL)
+    return;
 
   memset(&buf,'\0',MAXPATH);
   memset(&basebuf,'\0',MDBUFSIZE);
@@ -711,6 +715,8 @@ void cleanup_shtuff()
   if (tracksrch)
     fprintf(stdout, "Track data pattern matches->\t%d\n\n", trackdatacount);
   fprintf(stdout, "\nLocal end time: %s\n\n", asctime(localtime(&end_time)));
+  if (ignore)
+    free(ignore);
 }
 
 void process_cleanup()
@@ -737,6 +743,7 @@ void usage(char *progname)
   printf("    -b\t\t   Add the byte offset into the file of the number\n");
   printf("    -e\t\t   Include the Modify Access and Create times in terms \n\t\t   of seconds since the epoch\n");
   printf("    -f\t\t   Only print the filename w/ potential PAN data\n");
+  printf("    -i <filename>  Ignore credit card numbers in this list (test cards)\n");
   printf("    -j\t\t   Include the Modify Access and Create times in terms \n\t\t   of normal date/time\n");
   printf("    -o <filename>  Output the data to the file <filename> vs. standard out\n");
   printf("    -t <1 or 2>\t   Check if the pattern follows either a Track 1 \n\t\t   or 2 format\n");
@@ -863,22 +870,53 @@ void update_status(char *filename, int position)
 	}
 }
 
+static char *read_ignore_list(const char *filename, size_t *len)
+{
+  char  *buf;
+  FILE  *infile;
+
+  infile = fopen(filename, "r");
+  if (!infile)
+    return NULL;
+
+  fseek(infile, 0, SEEK_END);
+  *len = ftell(infile);
+  fseek(infile, 0, SEEK_SET);
+  buf = malloc(*len+1);
+  if (buf == NULL)
+    return NULL;
+
+  if (fread(buf, 1, *len, infile) == 0)
+    fprintf(stderr, "Error with reading buf from %s\n", filename);
+  fclose(infile);
+  return buf;
+}
+
+static void split_ignore_list(char *buf, size_t len)
+{
+  for (int i=0; i<len; i++) {
+    if (buf[i] == '\n')
+      buf[i] = ' ';
+  }
+}
+
 int main(int argc, char *argv[])
 {
   struct stat	ffstat;
-  char  *inputstr      = NULL;
-  char  *inbuf         = NULL;
-  char  *tracktype_str = NULL;
-  char  tmpbuf[4096];
-  int   inlen          = 0;
-  int   err            = 0;
-  int   c              = 0;
-  int   limit_arg      = 0;
+  char       *inputstr      = NULL;
+  char       *inbuf         = NULL;
+  char       *tracktype_str = NULL;
+  char        tmpbuf[4096];
+  int         inlen          = 0;
+  int         err            = 0;
+  int         c              = 0;
+  int         limit_arg      = 0;
+  size_t      len;
 
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:cml:n:s")) != -1) {
+  while ((c = getopt(argc, argv,"befi:jt:To:cml:n:s")) != -1) {
       switch (c) {
       case 'b':
         print_byte_offset=1;
@@ -888,6 +926,11 @@ int main(int argc, char *argv[])
         break;
       case 'f':
         print_filename_only=1;
+        break;
+      case 'i':
+        ignore = read_ignore_list(optarg, &len);
+        if (ignore)
+          split_ignore_list(ignore, len);
         break;
       case 'j':
         print_julian_time=1;
