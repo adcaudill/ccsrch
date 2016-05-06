@@ -64,6 +64,7 @@ int    newstatus            = 0;
 int    status_lastupdate    = 0;
 int    status_msglength     = 0;
 int    mask_card_number     = 0;
+int    limit_ascii          = 0;
 
 void initialize_buffer()
 {
@@ -308,6 +309,15 @@ int is_same_repeating_digits(int len)
 	return ret;
 }
 
+static int is_ascii_buf(const char *buf, int len)
+{
+  for (int i=0; i < len; i++) {
+    if (!isascii(buf[i]))
+      return 0;
+  }
+  return 1;
+}
+
 int ccsrch(char *filename)
 {
   FILE  *in            = NULL;
@@ -346,6 +356,9 @@ int ccsrch(char *filename)
     memset(&ccsrch_buf, '\0', BSIZE);
     cnt = fread(&ccsrch_buf, 1, BSIZE - 1, in);
     if (cnt <= 0)
+      break;
+
+    if (limit_ascii && !is_ascii_buf(ccsrch_buf, cnt))
       break;
 
     for (ccsrch_index=0; ccsrch_index<cnt && limit_exceeded==0; ccsrch_index++) {
@@ -707,6 +720,7 @@ void usage(char *progname)
   printf("%s\n", PROG_VER);
   printf("Usage: %s <options> <start path>\n", progname);
   printf("  where <options> are:\n");
+  printf("    -a\t\t   Limit to ascii files.\n");
   printf("    -b\t\t   Add the byte offset into the file of the number\n");
   printf("    -e\t\t   Include the Modify Access and Create times in terms \n\t\t   of seconds since the epoch\n");
   printf("    -f\t\t   Only print the filename w/ potential PAN data\n");
@@ -883,67 +897,70 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befi:jt:To:cml:n:s")) != -1) {
+  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:s")) != -1) {
       switch (c) {
-      case 'b':
-        print_byte_offset=1;
+        case 'a':
+          limit_ascii = 1;
         break;
-      case 'e':
-        print_epoch_time=1;
-        break;
-      case 'f':
-        print_filename_only=1;
-        break;
-      case 'i':
-        ignore = read_ignore_list(optarg, &len);
-        if (ignore)
-          split_ignore_list(ignore, len);
-        break;
-      case 'j':
-        print_julian_time=1;
-        break;
-      case 'o':
-        logfilename=optarg;
-        break;
-      case 't':
-        tracksrch=1;
-        tracktype_str=optarg;
-        if (atoi(tracktype_str)==1)
+        case 'b':
+          print_byte_offset=1;
+          break;
+        case 'e':
+          print_epoch_time=1;
+          break;
+        case 'f':
+          print_filename_only=1;
+          break;
+        case 'i':
+          ignore = read_ignore_list(optarg, &len);
+          if (ignore)
+            split_ignore_list(ignore, len);
+          break;
+        case 'j':
+          print_julian_time=1;
+          break;
+        case 'o':
+          logfilename=optarg;
+          break;
+        case 't':
+          tracksrch=1;
+          tracktype_str=optarg;
+          if (atoi(tracktype_str)==1)
+            tracktype1=1;
+          else if (atoi(tracktype_str)==2)
+            tracktype2=1;
+          else
+            usage(argv[0]);
+          break;
+        case 'T':
+          tracksrch=1;
           tracktype1=1;
-        else if (atoi(tracktype_str)==2)
           tracktype2=1;
-        else
-          usage(argv[0]);
-        break;
-      case 'T':
-        tracksrch=1;
-        tracktype1=1;
-        tracktype2=1;
-        break;
-      case 'c':
-      	print_file_hit_count=1;
-      	break;
-      case 'm':
-        mask_card_number=1;
-        break;
-      case 'l':
-      	limit_arg = atoi(optarg);
-      	if (limit_arg > 0)
-      	  limit_file_results = limit_arg;
-      	else
-      		usage(argv[0]);
-      	break;
-      case 'n':
-      	exclude_extensions = stolower(optarg);
-      	break;
-      case 's':
-      	newstatus = 1;
+          break;
+        case 'c':
+        	print_file_hit_count=1;
+        	break;
+        case 'm':
+          mask_card_number=1;
+          break;
+        case 'l':
+        	limit_arg = atoi(optarg);
+        	if (limit_arg > 0)
+        	  limit_file_results = limit_arg;
+        	else
+        		usage(argv[0]);
+        	break;
+        case 'n':
+        	exclude_extensions = stolower(optarg);
+        	break;
+        case 's':
+        	newstatus = 1;
 
-      	break;
-      case 'h':
-      default:
-        usage(argv[0]);
-        break;
+        	break;
+        case 'h':
+        default:
+          usage(argv[0]);
+          break;
     }
   }
 
