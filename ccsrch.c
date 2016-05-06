@@ -433,8 +433,7 @@ int escape_space(char *infile, char *outfile)
   }
   memset(tmpbuf, '\0', newlen);
 
-  i = 0;
-  while (i < filelen) {
+  for (i=0; i<filelen; i++) {
     if (infile[i] == ' ') {
       tmpbuf[newpos++] = '\\';
       tmpbuf[newpos] = infile[i];
@@ -442,7 +441,6 @@ int escape_space(char *infile, char *outfile)
       tmpbuf[newpos] = infile[i];
     }
     newpos++;
-    i++;
   }
   strncpy(outfile, tmpbuf, newlen);
   free(tmpbuf);
