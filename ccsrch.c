@@ -227,37 +227,25 @@ int process_prefix(int len, long offset)
     case 14:
       check_diners_club_cb_14(offset);
       break;
-/** It has been purported that these cards are no longer in use
-  case 13:
-    check_visa_13(offset);
-    break;
-**/
   }
   return 0;
 }
 
 int luhn_check(int len, long offset)
 {
-  int    i      = 0;
-  int    tmp    = 0;
-  int    total  = 0;
-  int    nummod = 0;
-  int    num[CARDSIZE];
+  int i      = 0;
+  int tmp    = 0;
+  int total  = 0;
+  int nummod = 0;
+  int num[CARDSIZE];
 
   if (cardbuf[i]<=0)
     return 0;
 
-  for (i=0; i<CARDSIZE; i++)
-    num[i]=0;
+  memset(num, 0, CARDSIZE);
 
   for (i=0; i<len; i++)
    num[i]=cardbuf[i];
-
-#ifdef DEBUG
-  for (i=0; i<len; i++)
-    printf("%d ",num[i]);
-  printf("\n");
-#endif
 
   for (i=len-2; i>=0; i-=2) {
     tmp=2*num[i];
@@ -270,15 +258,13 @@ int luhn_check(int len, long offset)
     total += num[i];
 
   nummod = total % 10;
-  if (nummod == 0 && has_repeating_digits(len) == 0 && is_same_repeating_digits(len) == 0)
+  if (nummod == 0)
   {
 #ifdef DEBUG
   printf("Luhn Check passed ***********************************\n");
 #endif
-
     process_prefix(len, offset);
   }
-
   return nummod;
 }
 
@@ -601,13 +587,18 @@ int proc_dir_list(char *instr)
 
 void check_mastercard_16(long offset)
 {
-  char  num2buf[3];
-  int   vnum = 0;
+  char num2buf[7];
+  int  vnum = 0;
 
-  memset(&num2buf, '\0', 3);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 3, "%d%d", cardbuf[0], cardbuf[1]);
   vnum = atoi(num2buf);
   if ((vnum > 50) && (vnum < 56))
+    print_result("MASTERCARD", 16, offset);
+
+  snprintf(num2buf, sizeof(num2buf), "%d%d%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3], cardbuf[4], cardbuf[5]);
+  vnum = atoi(num2buf);
+  if ((vnum >= 222100) && (vnum <= 272099))
     print_result("MASTERCARD", 16, offset);
 }
 
@@ -616,7 +607,7 @@ void check_visa_16(long offset)
   char  num2buf[2];
   int   vnum = 0;
 
-  memset(&num2buf, '\0', 2);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 2, "%d", cardbuf[0]);
   vnum = atoi(num2buf);
   if (vnum == 4)
@@ -628,7 +619,7 @@ void check_discover_16(long offset)
   char  num2buf[5];
   int   vnum = 0;
 
-  memset(&num2buf, '\0', 5);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
   vnum = atoi(num2buf);
   if (vnum == 6011)
@@ -640,10 +631,10 @@ void check_jcb_16(long offset)
   char  num2buf[5];
   int   vnum = 0;
 
-  memset(&num2buf, '\0', 2);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
   vnum = atoi(num2buf);
-  if ((vnum == 3088) || (vnum == 3096) || (vnum == 3112) || (vnum == 3158) || (vnum == 3337) || (vnum == 3528) || (vnum == 3529))
+  if ((vnum >= 3528) && (vnum <= 3589))
     print_result("JCB", 16, offset);
 }
 
@@ -652,7 +643,7 @@ void check_amex_15(long offset)
   char  num2buf[3];
   int   vnum = 0;
 
-  memset(&num2buf, '\0', 3);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 3, "%d%d", cardbuf[0], cardbuf[1]);
   vnum = atoi(num2buf);
   if ((vnum == 34) || (vnum == 37))
@@ -664,7 +655,7 @@ void check_enroute_15(long offset)
   char  num2buf[5];
   int   vnum = 0;
 
-  memset(&num2buf, '\0', 5);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
   vnum = atoi(num2buf);
   if ((vnum == 2014) || (vnum == 2149))
@@ -676,7 +667,7 @@ void check_jcb_15(long offset)
   char  num2buf[5];
   int   vnum = 0;
 
-  memset(&num2buf, '\0', 5);
+  memset(&num2buf, 0, sizeof(num2buf));
   snprintf(num2buf, 5, "%d%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2], cardbuf[3]);
   vnum = atoi(num2buf);
   if ((vnum == 2131) || (vnum == 1800) || (vnum == 3528) || (vnum == 3529))
@@ -687,16 +678,17 @@ void check_diners_club_cb_14(long offset)
 {
   char  num2buf[4];
   char  num2buf2[3];
-  int   vnum  = 0;
+  int   vnum = 0;
   int   vnum2 = 0;
 
-  memset(&num2buf, '\0', 4);
-  memset(&num2buf2, '\0', 2);
+  memset(&num2buf, 0, sizeof(num2buf));
+  memset(&num2buf2, 0, sizeof(num2buf2));
   snprintf(num2buf, 4, "%d%d%d", cardbuf[0], cardbuf[1], cardbuf[2]);
   snprintf(num2buf2, 3, "%d%d", cardbuf[0], cardbuf[1]);
   vnum = atoi(num2buf);
   vnum2 = atoi(num2buf2);
-  if (((vnum > 299) && (vnum < 306)) || ((vnum > 379) && (vnum < 389)) || (vnum2 == 36))
+  if (((vnum > 299) && (vnum < 306)) || ((vnum > 379) && (vnum < 389)) || (vnum2 == 36) || 
+      ((vnum2 >= 38) && (vnum2 <=39)))
     print_result("DINERS_CLUB_CARTE_BLANCHE", 14, offset);
 }
 
