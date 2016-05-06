@@ -777,37 +777,36 @@ int check_dir (char *name)
   }
 }
 
-int is_allowed_file_type (char *name)
+int is_allowed_file_type(const char *name)
 {
-	char delim[]  = ",";
-	char *exclude = NULL;
-	char *fname   = NULL;
-	char *result  = NULL;
-	char *ext     = NULL;
-	int ret       = 0;
+  char  delim[] = ",";
+  char *exclude = NULL;
+  char *fname   = NULL;
+  char *result  = NULL;
+  char *ext     = NULL;
+  int   ret     = 0;
 
-	if(exclude_extensions != NULL) {
-		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
-		strcpy(exclude, exclude_extensions);
-		fname = malloc(sizeof(char) * strlen(name) + 1);
-		strcpy(fname, name);
-		ext = stolower(get_filename_ext(fname));
-		if (ext != NULL && ext[0] != '\0') {
-			result = strtok(exclude, delim);
-			while(result != NULL) {
-				if(strcmp(result, ext) ==0) {
-					ret = 1;
-					break;
-				} else {
-					result = strtok(NULL, delim);
-        }
-			}
-		}
-		free(exclude);
-		free(fname);
+  if (exclude_extensions == NULL)
+    return 0;
+
+  exclude = strdup(exclude_extensions);
+  fname   = strdup(name);
+  ext     = get_filename_ext(fname);
+  stolower(ext);
+  if (ext != NULL && ext[0] != '\0') {
+    result = strtok(exclude, delim);
+    while (result != NULL) {
+      if (strcmp(result, ext) == 0) {
+        ret = 1;
+        break;
+      } else {
+        result = strtok(NULL, delim);
+      }
+    }
   }
-
-	return ret;
+  free(exclude);
+  free(fname);
+  return ret;
 }
 
 char *get_filename_ext(char *filename)
