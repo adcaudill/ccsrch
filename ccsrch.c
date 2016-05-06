@@ -31,39 +31,53 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <ctype.h>
-#include "ccsrch.h"
 
-char   ccsrch_buf[BSIZE];
-char   lastfilename[MAXPATH];
-char  *exclude_extensions;
-char  *logfilename          = NULL;
-char  *currfilename         = NULL;
-char  *ignore               = NULL;
-FILE  *logfilefd            = NULL;
-long   total_count          = 0;
-long   file_count           = 0;
-long   currfile_atime       = 0;
-long   currfile_mtime       = 0;
-long   currfile_ctime       = 0;
-time_t init_time            = 0;
-int    cardbuf[CARDSIZE];
-int    print_byte_offset    = 0;
-int    print_epoch_time     = 0;
-int    print_julian_time    = 0;
-int    print_filename_only  = 0;
-int    print_file_hit_count = 0;
-int    ccsrch_index         = 0;
-int    tracksrch            = 0;
-int    tracktype1           = 0;
-int    tracktype2           = 0;
-int    trackdatacount       = 0;
-int    file_hit_count       = 0;
-int    limit_file_results   = 0;
-int    newstatus            = 0;
-int    status_lastupdate    = 0;
-int    status_msglength     = 0;
-int    mask_card_number     = 0;
-int    limit_ascii          = 0;
+#ifndef SIGHUP
+  #define SIGHUP 1
+#endif
+#ifndef SIGQUIT
+  #define SIGQUIT 3
+#endif
+
+#define PROG_VER "ccsrch 1.0.9 (c) 2012-2016 Adam Caudill <adam@adamcaudill.com>\n             (c) 2007 Mike Beekey <zaphod2718@yahoo.com>"
+
+#define MDBUFSIZE    512
+#define MAXPATH     2048
+#define BSIZE       4096
+#define CARDTYPELEN   64
+#define CARDSIZE      17
+
+static char   ccsrch_buf[BSIZE];
+static char   lastfilename[MAXPATH];
+static char  *exclude_extensions;
+static char  *logfilename          = NULL;
+static char  *currfilename         = NULL;
+static char  *ignore               = NULL;
+static FILE  *logfilefd            = NULL;
+static long   total_count          = 0;
+static long   file_count           = 0;
+static long   currfile_atime       = 0;
+static long   currfile_mtime       = 0;
+static long   currfile_ctime       = 0;
+static time_t init_time            = 0;
+static int    cardbuf[CARDSIZE];
+static int    print_byte_offset    = 0;
+static int    print_epoch_time     = 0;
+static int    print_julian_time    = 0;
+static int    print_filename_only  = 0;
+static int    print_file_hit_count = 0;
+static int    ccsrch_index         = 0;
+static int    tracksrch            = 0;
+static int    tracktype1           = 0;
+static int    tracktype2           = 0;
+static int    trackdatacount       = 0;
+static int    file_hit_count       = 0;
+static int    limit_file_results   = 0;
+static int    newstatus            = 0;
+static int    status_lastupdate    = 0;
+static int    status_msglength     = 0;
+static int    mask_card_number     = 0;
+static int    limit_ascii          = 0;
 
 static void initialize_buffer()
 {
@@ -395,7 +409,7 @@ static void update_status(char *filename, int position)
 {
   struct tm *current;
   time_t     now;
-  char       msgbuffer[512];
+  char       msgbuffer[MDBUFSIZE];
   char      *fn;
 
   /* if ((int)time(NULL) > status_lastupdate) */
@@ -637,7 +651,7 @@ static int proc_dir_list(char *instr)
   char           *curr_path    = NULL;
   struct stat     fstat;
   int             err          = 0;
-  char            tmpbuf[4096];
+  char            tmpbuf[BSIZE];
 
   if (instr == NULL)
     return 1;
@@ -686,7 +700,7 @@ static int proc_dir_list(char *instr)
       snprintf(curr_path+strlen(curr_path), MAXPATH-strlen(curr_path), "/");
       proc_dir_list(curr_path);
     } else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG)) {
-      memset(&tmpbuf, '\0', 4096);
+      memset(&tmpbuf, '\0', BSIZE);
       if (escape_space(curr_path, tmpbuf) == 0) {
         /* rest file_hit_count so we can keep track of many hits each file has */
         file_hit_count = 0;
@@ -827,7 +841,7 @@ int main(int argc, char *argv[])
   char       *inputstr      = NULL;
   char       *inbuf         = NULL;
   char       *tracktype_str = NULL;
-  char        tmpbuf[4096];
+  char        tmpbuf[BSIZE];
   int         inlen          = 0;
   int         err            = 0;
   int         c              = 0;
@@ -954,7 +968,7 @@ int main(int argc, char *argv[])
     }
 
     if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG)) {
-      memset(&tmpbuf, '\0', 4096);
+      memset(&tmpbuf, '\0', BSIZE);
       if (escape_space(inbuf, tmpbuf) == 0) {
         if (logfilename != NULL) {
           if (strstr(inbuf, logfilename) != NULL) {
