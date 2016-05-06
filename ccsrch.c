@@ -678,9 +678,7 @@ void check_diners_club_cb_14(long offset)
 
 void cleanup_shtuff()
 {
-  time_t end_time;
-
-  end_time=time(NULL);
+  time_t end_time = time(NULL);
   printf("\n\nFiles searched ->\t\t%ld\n", file_count);
   printf("Search time (seconds) ->\t%ld\n", ((int)time(NULL) - init_time));
   printf("Credit card matches->\t\t%ld\n", total_count);
@@ -689,22 +687,17 @@ void cleanup_shtuff()
   printf("\nLocal end time: %s\n\n", asctime(localtime(&end_time)));
   if (ignore)
     free(ignore);
-}
-
-void process_cleanup()
-{
   if (logfilefd != NULL)
     fclose(logfilefd);
-  cleanup_shtuff();
   exit(0);
 }
 
 void signal_proc()
 {
-  signal(SIGHUP, process_cleanup);
-  signal(SIGTERM, process_cleanup);
-  signal(SIGINT, process_cleanup);
-  signal(SIGQUIT, process_cleanup);
+  signal(SIGHUP,  cleanup_shtuff);
+  signal(SIGTERM, cleanup_shtuff);
+  signal(SIGINT,  cleanup_shtuff);
+  signal(SIGQUIT, cleanup_shtuff);
 }
 
 void usage(char *progname)
@@ -1035,9 +1028,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "main: Unknown mode returned-> %x\n", ffstat.st_mode);
     }
   }
-
-  cleanup_shtuff();
   free(inbuf);
-
+  cleanup_shtuff();
   return 0;
 }
