@@ -122,12 +122,12 @@ void print_result(char *cardname, int cardlen, long byte_offset)
     snprintf(basebuf, MDBUFSIZE, "%s\t%s\t%s", currfilename, cardname, nbuf);
   }
 
-  strncat(buf,basebuf,sizeof(buf)-strlen(buf)-1);
+  snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", basebuf);
 
   if (print_byte_offset) {
     memset(&bytebuf,'\0',MDBUFSIZE);
     snprintf(bytebuf, MDBUFSIZE, "\t%ld", byte_offset);
-    strncat(buf,bytebuf,sizeof(buf)-strlen(buf)-1);
+    snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", bytebuf);
   }
   if (print_julian_time) {
     memset(&mdatebuf,'\0',CARDTYPELEN);
@@ -144,38 +144,34 @@ void print_result(char *cardname, int cardlen, long byte_offset)
 
     memset(&datebuf,'\0',MDBUFSIZE);
     snprintf(datebuf, MDBUFSIZE, "\t%s\t%s\t%s", mdatebuf,adatebuf,cdatebuf);
-    strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
+    snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", datebuf);
   }
 
   if (print_epoch_time) {
     memset(&datebuf,'\0',MDBUFSIZE);
     snprintf(datebuf, MDBUFSIZE, "\t%ld\t%ld\t%ld", currfile_mtime,currfile_atime,currfile_ctime);
-    strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
+    snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", datebuf);
   }
 
   if (tracksrch) {
     memset(&trackbuf,'\0',MDBUFSIZE);
-    if (tracktype1)
-    {
-      if (track1_srch(cardlen))
-      {
+    if (tracktype1) {
+      if (track1_srch(cardlen)) {
         snprintf(trackbuf, MDBUFSIZE, "\tTRACK_1");
       }
     }
-    if (tracktype2)
-    {
-      if (track2_srch(cardlen))
-      {
+    if (tracktype2) {
+      if (track2_srch(cardlen)) {
         snprintf(trackbuf, MDBUFSIZE, "\tTRACK_2");
       }
     }
-    strncat(buf,trackbuf,sizeof(buf)-strlen(buf)-1);
+    snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", trackbuf);
   }
 
   if (logfilefd != NULL) {
     fprintf(logfilefd, "%s\n", buf);
   } else {
-    fprintf(stdout, "%s\n", buf);
+    printf("%s\n", buf);
   }
 
   total_count++;
@@ -709,12 +705,12 @@ void cleanup_shtuff()
   time_t end_time;
 
   end_time=time(NULL);
-  fprintf(stdout, "\n\nFiles searched ->\t\t%ld\n", file_count);
-  fprintf(stdout, "Search time (seconds) ->\t%ld\n", ((int)time(NULL) - init_time));
-  fprintf(stdout, "Credit card matches->\t\t%ld\n", total_count);
+  printf("\n\nFiles searched ->\t\t%ld\n", file_count);
+  printf("Search time (seconds) ->\t%ld\n", ((int)time(NULL) - init_time));
+  printf("Credit card matches->\t\t%ld\n", total_count);
   if (tracksrch)
-    fprintf(stdout, "Track data pattern matches->\t%d\n\n", trackdatacount);
-  fprintf(stdout, "\nLocal end time: %s\n\n", asctime(localtime(&end_time)));
+    printf("Track data pattern matches->\t%d\n\n", trackdatacount);
+  printf("\nLocal end time: %s\n\n", asctime(localtime(&end_time)));
   if (ignore)
     free(ignore);
 }
