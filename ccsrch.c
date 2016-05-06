@@ -173,19 +173,12 @@ static void print_result(const char *cardname, int cardlen, long byte_offset)
     snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", bytebuf);
   }
   if (print_julian_time) {
-    memset(&mdatebuf,'\0',CARDTYPELEN);
-    strncpy(mdatebuf,ctime((time_t *)&currfile_mtime),CARDTYPELEN);
-    mdatebuf[strlen(mdatebuf)-1]='\0';
-
-    memset(&adatebuf,'\0',CARDTYPELEN);
-    strncpy(adatebuf,ctime((time_t *)&currfile_atime),CARDTYPELEN);
-    adatebuf[strlen(adatebuf)-1]='\0';
-
-    memset(&cdatebuf,'\0',CARDTYPELEN);
-    strncpy(cdatebuf,ctime((time_t *)&currfile_ctime),CARDTYPELEN);
-    cdatebuf[strlen(cdatebuf)-1]='\0';
-
-    memset(&datebuf,'\0',MDBUFSIZE);
+    snprintf(mdatebuf, CARDTYPELEN, "%s", ctime((time_t *)&currfile_mtime));
+    mdatebuf[strlen(mdatebuf)-1] = '\0';
+    snprintf(adatebuf, CARDTYPELEN, "%s", ctime((time_t *)&currfile_atime));
+    adatebuf[strlen(mdatebuf)-1] = '\0';
+    snprintf(cdatebuf, CARDTYPELEN, "%s", ctime((time_t *)&currfile_atime));
+    cdatebuf[strlen(mdatebuf)-1] = '\0';
     snprintf(datebuf, MDBUFSIZE, "\t%s\t%s\t%s", mdatebuf,adatebuf,cdatebuf);
     snprintf(buf+strlen(buf), MAXPATH-strlen(buf), "%s", datebuf);
   }
@@ -427,7 +420,7 @@ static void update_status(const char *filename, int position)
       fn++;
     }
 
-    status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r",
+    status_msglength = snprintf(msgbuffer, MDBUFSIZE, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r",
       current->tm_hour, current->tm_min, current->tm_sec,
       fn,
       (position / 1024) / 1024);
@@ -563,28 +556,22 @@ static int escape_space(const char *infile, char *outfile)
     }
     newpos++;
   }
-  strncpy(outfile, tmpbuf, newlen);
+  snprintf(outfile, newlen, "%s", tmpbuf);
   free(tmpbuf);
   return 0;
 }
 
 static int get_file_stat(const char *inputfile, struct stat *fileattr)
 {
-  int   err      = 0;
+  int   err     = 0;
   char *tmp2buf = NULL;
-  int   filelen  = 0;
 
-  filelen = strlen(inputfile);
-  tmp2buf = (char *) malloc(filelen+1);
-
+  tmp2buf = strdup(inputfile);
   if (tmp2buf == NULL) {
     fprintf(stderr, "get_file_stat: can't allocate memory; errno=%d\n", errno);
     return 1;
   }
-  memset(tmp2buf, '\0', filelen+1);
-  strncpy(tmp2buf, inputfile, filelen);
 
-  errno=0;
   err = stat(tmp2buf, fileattr);
   if (err != 0) {
     if (errno == ENOENT) {
@@ -625,6 +612,9 @@ static int is_allowed_file_type(const char *name)
 
   exclude = strdup(exclude_extensions);
   fname   = strdup(name);
+  if (exclude == NULL || fname == NULL)
+    return 0;
+
   ext     = get_filename_ext(fname);
   stolower(ext);
   if (ext != NULL && ext[0] != '\0') {
@@ -673,8 +663,7 @@ static int proc_dir_list(const char *instr)
     closedir(dirptr);
     return 1;
   }
-  memset(curr_path, '\0', MAXPATH+1);
-  strncpy(curr_path, instr, MAXPATH);
+  snprintf(curr_path, MAXPATH, "%s", instr);
 
   while ((direntptr = readdir(dirptr)) != NULL) {
     /* readdir give us everything and not necessarily in order. This
@@ -937,11 +926,11 @@ int main(int argc, char *argv[])
   if (open_logfile() < 0)
     exit(-1);
 
-  inbuf = (char *)malloc(inlen + 1);
-
-  memset(inbuf, '\0', inlen+1);
-  strncpy(inbuf, inputstr, inlen);
-
+  inbuf = strdup(inputstr);
+  if (inbuf == NULL) {
+    fprintf(stderr, "strdup: cannot allocate memory erro=%d\n", errno);
+    cleanup_shtuff();
+  }
   signal_proc();
 
   init_time = time(NULL);
@@ -964,7 +953,7 @@ int main(int argc, char *argv[])
       } else {
         fprintf(stderr, "Cannot stat file %s; errno=%d\n", inbuf, errno);
       }
-      exit (-1);
+      exit(-1);
     }
 
     if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG)) {
