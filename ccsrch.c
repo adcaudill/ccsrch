@@ -279,10 +279,8 @@ int has_repeating_digits(int len)
 		if (cardbuf[i] == last) {
 			count++;
 
-			if (count == 7) {
-				ret = 1;
-				break;
-			}
+			if (count == 7)
+				return 1;
 		} else {
 			last = cardbuf[i];
 			count = 0;
@@ -303,8 +301,7 @@ int is_same_repeating_digits(int len)
 		if (cardbuf[i] == first && (i+1 >= len || cardbuf[i+1] == sec)) {
 			ret = 1;
 		} else {
-			ret = 0;
-			break;
+			return 0;
 		}
 	}
 
@@ -314,7 +311,6 @@ int is_same_repeating_digits(int len)
 int ccsrch(char *filename)
 {
   FILE  *in            = NULL;
-  int   infd           = 0;
   int   cnt            = 0;
   long  byte_offset    = 1;
   int   k              = 0;
@@ -328,7 +324,7 @@ int ccsrch(char *filename)
 #endif
 
   memset(&lastfilename,'\0',MAXPATH);
-  ccsrch_index =0;
+  ccsrch_index = 0;
   errno        = 0;
   in = fopen(filename, "rb");
   if (in == NULL) {
@@ -339,7 +335,6 @@ int ccsrch(char *filename)
     }
     return -1;
   }
-  infd = fileno(in);
   currfilename = filename;
   byte_offset=1;
 
@@ -349,20 +344,18 @@ int ccsrch(char *filename)
 
   while (1 && limit_exceeded == 0) {
     memset(&ccsrch_buf, '\0', BSIZE);
-    cnt = read(infd, &ccsrch_buf, BSIZE - 1);
+    cnt = fread(&ccsrch_buf, 1, BSIZE - 1, in);
     if (cnt <= 0)
       break;
 
-    ccsrch_index = 0;
-
-    while (ccsrch_index < cnt && limit_exceeded == 0) {
+    for (ccsrch_index=0; ccsrch_index<cnt && limit_exceeded==0; ccsrch_index++) {
       /* check to see if our data is 0...9 (based on ACSII value) */
-      if ((ccsrch_buf[ccsrch_index] >= 48) && (ccsrch_buf[ccsrch_index] <= 57)) {
+      if ((ccsrch_buf[ccsrch_index] >= '0') && (ccsrch_buf[ccsrch_index] <= '9')) {
         check = 1;
-        cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-48;
+        cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-'0';
         counter++;
-      } else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) ||
-      	   (ccsrch_buf[ccsrch_index] == 13) || (ccsrch_buf[ccsrch_index] == 45)) {
+      } else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == '\r') ||
+      	   (ccsrch_buf[ccsrch_index] == '\n') || (ccsrch_buf[ccsrch_index] == '-')) {
         /*
          * we consider dashes, nulls, new lines, and carriage
          * returns to be noise, so ingore those
@@ -375,20 +368,7 @@ int ccsrch(char *filename)
       }
 
       if (((counter > 12) && (counter < CARDSIZE)) && (check)) {
-        switch (counter) {
-          case 16:
-            luhn_check(16,byte_offset-16);
-            break;
-          case 15:
-            luhn_check(15,byte_offset-15);
-            break;
-          case 14:
-            luhn_check(14,byte_offset-14);
-            break;
-          case 13:
-            luhn_check(13,byte_offset-13);
-            break;
-        }
+        luhn_check(counter, byte_offset-counter);
       } else if ((counter == CARDSIZE) && (check)) {
         for (k=0; k<counter-1; k++) {
           cardbuf[k] = cardbuf[k + 1];
@@ -401,7 +381,6 @@ int ccsrch(char *filename)
         counter--;
       }
       byte_offset++;
-      ccsrch_index++;
 
       if (newstatus == 1)
       	update_status(currfilename, byte_offset);
