@@ -814,19 +814,19 @@ char *get_filename_ext(char *filename)
 {
 	char *slash = strrchr(filename, '/');
   char *dot   = strrchr(slash, '.');
-  if(!dot || dot == slash) return "";
+  if(!dot || dot == slash)
+    return "";
   return dot;
 }
 
-char* stolower(char* s)
+char *stolower(char *buf)
 {
-  char* p = s;
+  char *ptr = buf;
 
-  if (strlen(s) == 0)
-  	return s;
+  if (buf == NULL || strlen(buf) == 0)
+    return buf;
 
-  while ((*p = tolower( *p ))) p++;
-  return s;
+  while ((*ptr = tolower(*ptr))) ptr++;
 }
 
 void update_status(char *filename, int position)
