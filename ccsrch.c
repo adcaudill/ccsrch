@@ -51,7 +51,7 @@ static char   ccsrch_buf[BSIZE];
 static char   lastfilename[MAXPATH];
 static char  *exclude_extensions;
 static char  *logfilename          = NULL;
-static char  *currfilename         = NULL;
+static const char  *currfilename   = NULL;
 static char  *ignore               = NULL;
 static FILE  *logfilefd            = NULL;
 static long   total_count          = 0;
@@ -127,7 +127,7 @@ static int track2_srch(int cardlen)
   }
 }
 
-static void print_result(char *cardname, int cardlen, long byte_offset)
+static void print_result(const char *cardname, int cardlen, long byte_offset)
 {
   int		i = 0;
   char	nbuf[20];
@@ -405,7 +405,7 @@ static char *stolower(char *buf)
   return buf;
 }
 
-static void update_status(char *filename, int position)
+static void update_status(const char *filename, int position)
 {
   struct tm *current;
   time_t     now;
@@ -422,7 +422,7 @@ static void update_status(char *filename, int position)
     fn = strrchr(filename, '/');
 
     if (fn == NULL) {
-      fn = filename;
+      fn = (char *)filename;
     } else {
       fn++;
     }
@@ -440,7 +440,7 @@ static void update_status(char *filename, int position)
   }
 }
 
-static int ccsrch(char *filename)
+static int ccsrch(const char *filename)
 {
   FILE  *in            = NULL;
   int   cnt            = 0;
@@ -531,7 +531,7 @@ static int ccsrch(char *filename)
   return total;
 }
 
-static int escape_space(char *infile, char *outfile)
+static int escape_space(const char *infile, char *outfile)
 {
   int    i       = 0;
   int    spc     = 0;
@@ -568,11 +568,11 @@ static int escape_space(char *infile, char *outfile)
   return 0;
 }
 
-static int get_file_stat(char *inputfile, struct stat *fileattr)
+static int get_file_stat(const char *inputfile, struct stat *fileattr)
 {
-  int          err      = 0;
-  char         *tmp2buf = NULL;
-  int          filelen  = 0;
+  int   err      = 0;
+  char *tmp2buf = NULL;
+  int   filelen  = 0;
 
   filelen = strlen(inputfile);
   tmp2buf = (char *) malloc(filelen+1);
@@ -602,7 +602,7 @@ static int get_file_stat(char *inputfile, struct stat *fileattr)
   return 0;
 }
 
-static char *get_filename_ext(char *filename)
+static char *get_filename_ext(const char *filename)
 {
   char *slash = strrchr(filename, '/');
   char *dot   = strrchr(slash, '.');
@@ -643,7 +643,7 @@ static int is_allowed_file_type(const char *name)
   return ret;
 }
 
-static int proc_dir_list(char *instr)
+static int proc_dir_list(const char *instr)
 {
   DIR            *dirptr;
   struct dirent  *direntptr;
@@ -756,7 +756,7 @@ static void signal_proc()
   signal(SIGQUIT, cleanup_shtuff);
 }
 
-static void usage(char *progname)
+static void usage(const char *progname)
 {
   printf("%s\n", PROG_VER);
   printf("Usage: %s <options> <start path>\n", progname);
@@ -782,7 +782,7 @@ static void usage(char *progname)
 
 static int open_logfile()
 {
-  if (logfilename!=NULL) {
+  if (logfilename != NULL) {
     logfilefd = fopen(logfilename, "a+");
     if (logfilefd == NULL) {
       fprintf(stderr, "Unable to open logfile %s for writing; errno=%d\n", logfilename, errno);
@@ -792,7 +792,7 @@ static int open_logfile()
   return 0;
 }
 
-static int check_dir (char *name)
+static int check_dir(const char *name)
 {
   DIR *dirptr;
 
