@@ -33,42 +33,40 @@
 #include <ctype.h>
 #include "ccsrch.h"
 
-char   *logfilename = NULL;
-char   *currfilename = NULL;
-FILE   *logfilefd = NULL;
-long   total_count = 0;
-long   file_count = 0;
-long   currfile_atime=0;
-long   currfile_mtime=0;
-long   currfile_ctime=0;
-int    init_time = 0;
-int    cardbuf[CARDSIZE];
-int    print_byte_offset=0;
-int    print_epoch_time=0;
-int    print_julian_time=0;
-int    print_filename_only=0;
-int    print_file_hit_count=0;
 char   ccsrch_buf[BSIZE];
-int    ccsrch_index = 0;
-int    tracksrch=0;
-int    tracktype1=0;
-int    tracktype2=0;
-int    trackdatacount=0;
 char   lastfilename[MAXPATH];
-int    filename_pan_count=0;
-int    file_hit_count=0;
-int    limit_file_results=0;
-char   *exclude_extensions;
-int    newstatus = 0;
-int    status_lastupdate = 0;
-int    status_msglength = 0;
-int    mask_card_number = 0;
+char  *exclude_extensions;
+char  *logfilename          = NULL;
+char  *currfilename         = NULL;
+FILE  *logfilefd            = NULL;
+long   total_count          = 0;
+long   file_count           = 0;
+long   currfile_atime       = 0;
+long   currfile_mtime       = 0;
+long   currfile_ctime       = 0;
+time_t init_time            = 0;
+int    cardbuf[CARDSIZE];
+int    print_byte_offset    = 0;
+int    print_epoch_time     = 0;
+int    print_julian_time    = 0;
+int    print_filename_only  = 0;
+int    print_file_hit_count = 0;
+int    ccsrch_index         = 0;
+int    tracksrch            = 0;
+int    tracktype1           = 0;
+int    tracktype2           = 0;
+int    trackdatacount       = 0;
+int    filename_pan_count   = 0;
+int    file_hit_count       = 0;
+int    limit_file_results   = 0;
+int    newstatus            = 0;
+int    status_lastupdate    = 0;
+int    status_msglength     = 0;
+int    mask_card_number     = 0;
 
 void initialize_buffer()
 {
-  int	i=0;
-  for (i=0; i<CARDSIZE; i++)
-    cardbuf[i]=0;
+  memset(cardbuf, 0, CARDSIZE);
 }
 
 void mask_pan(char s[])
@@ -98,9 +96,9 @@ void print_result(char *cardname, int cardlen, long byte_offset)
   char	cdatebuf[CARDTYPELEN];
   char	trackbuf[MDBUFSIZE];
 
-  memset(&nbuf, '\0', 20);
+  memset(&nbuf, '\0', sizeof(nbuf));
 
-  for (i = 0; i < cardlen; i++)
+  for (i=0; i<cardlen; i++)
     nbuf[i] = cardbuf[i]+48;
 
   memset(&buf,'\0',MAXPATH);
@@ -114,68 +112,67 @@ void print_result(char *cardname, int cardlen, long byte_offset)
   filename with the count.  ensure that it gets flushed out on the last match
   if you are doing a diff between previous filename and new filename */
 
-  if (print_filename_only)
+  if (print_filename_only) {
     snprintf(basebuf, MDBUFSIZE, "%s", currfilename);
-  else
+  } else {
     snprintf(basebuf, MDBUFSIZE, "%s\t%s\t%s", currfilename, cardname, nbuf);
+  }
 
   strncat(buf,basebuf,sizeof(buf)-strlen(buf)-1);
 
-  if (print_byte_offset)
-  {
+  if (print_byte_offset) {
     memset(&bytebuf,'\0',MDBUFSIZE);
     snprintf(bytebuf, MDBUFSIZE, "\t%ld", byte_offset);
     strncat(buf,bytebuf,sizeof(buf)-strlen(buf)-1);
   }
-    if (print_julian_time)
+  if (print_julian_time) {
+    memset(&mdatebuf,'\0',CARDTYPELEN);
+    strncpy(mdatebuf,ctime((time_t *)&currfile_mtime),CARDTYPELEN);
+    mdatebuf[strlen(mdatebuf)-1]='\0';
+
+    memset(&adatebuf,'\0',CARDTYPELEN);
+    strncpy(adatebuf,ctime((time_t *)&currfile_atime),CARDTYPELEN);
+    adatebuf[strlen(adatebuf)-1]='\0';
+
+    memset(&cdatebuf,'\0',CARDTYPELEN);
+    strncpy(cdatebuf,ctime((time_t *)&currfile_ctime),CARDTYPELEN);
+    cdatebuf[strlen(cdatebuf)-1]='\0';
+
+    memset(&datebuf,'\0',MDBUFSIZE);
+    snprintf(datebuf, MDBUFSIZE, "\t%s\t%s\t%s", mdatebuf,adatebuf,cdatebuf);
+    strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
+  }
+
+  if (print_epoch_time) {
+    memset(&datebuf,'\0',MDBUFSIZE);
+    snprintf(datebuf, MDBUFSIZE, "\t%ld\t%ld\t%ld", currfile_mtime,currfile_atime,currfile_ctime);
+    strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
+  }
+
+  if (tracksrch) {
+    memset(&trackbuf,'\0',MDBUFSIZE);
+    if (tracktype1)
     {
-      memset(&mdatebuf,'\0',CARDTYPELEN);
-      strncpy(mdatebuf,ctime((time_t *)&currfile_mtime),CARDTYPELEN);
-      mdatebuf[strlen(mdatebuf)-1]='\0';
-
-	    memset(&adatebuf,'\0',CARDTYPELEN);
-	    strncpy(adatebuf,ctime((time_t *)&currfile_atime),CARDTYPELEN);
-	    adatebuf[strlen(adatebuf)-1]='\0';
-
-	    memset(&cdatebuf,'\0',CARDTYPELEN);
-	    strncpy(cdatebuf,ctime((time_t *)&currfile_ctime),CARDTYPELEN);
-	    cdatebuf[strlen(cdatebuf)-1]='\0';
-
-      memset(&datebuf,'\0',MDBUFSIZE);
-      snprintf(datebuf, MDBUFSIZE, "\t%s\t%s\t%s", mdatebuf,adatebuf,cdatebuf);
-      strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
-    }
-
-    if (print_epoch_time)
-    {
-      memset(&datebuf,'\0',MDBUFSIZE);
-      snprintf(datebuf, MDBUFSIZE, "\t%ld\t%ld\t%ld", currfile_mtime,currfile_atime,currfile_ctime);
-      strncat(buf,datebuf,sizeof(buf)-strlen(buf)-1);
-    }
-
-    if (tracksrch)
-    {
-      memset(&trackbuf,'\0',MDBUFSIZE);
-      if (tracktype1)
+      if (track1_srch(cardlen))
       {
-        if (track1_srch(cardlen))
-        {
-          snprintf(trackbuf, MDBUFSIZE, "\tTRACK_1");
-        }
+        snprintf(trackbuf, MDBUFSIZE, "\tTRACK_1");
       }
-      if (tracktype2)
-      {
-        if (track2_srch(cardlen))
-        {
-          snprintf(trackbuf, MDBUFSIZE, "\tTRACK_2");
-        }
-      }
-      strncat(buf,trackbuf,sizeof(buf)-strlen(buf)-1);
     }
-  if (logfilefd != NULL)
+    if (tracktype2)
+    {
+      if (track2_srch(cardlen))
+      {
+        snprintf(trackbuf, MDBUFSIZE, "\tTRACK_2");
+      }
+    }
+    strncat(buf,trackbuf,sizeof(buf)-strlen(buf)-1);
+  }
+
+  if (logfilefd != NULL) {
     fprintf(logfilefd, "%s\n", buf);
-  else
+  } else {
     fprintf(stdout, "%s\n", buf);
+  }
 
   total_count++;
   file_hit_count++;
@@ -185,72 +182,69 @@ int track1_srch(int cardlen)
 {
   /* [%:B:cardnum:^:name (first initial cap?, let's ignore the %)] */
   if ((ccsrch_buf[ccsrch_index+1] == '^')
-    && (ccsrch_buf[ccsrch_index-cardlen] == 66)
-    && (ccsrch_buf[ccsrch_index+2] > 64)
-    && (ccsrch_buf[ccsrch_index+2] < 91))
-  {
+      && (ccsrch_buf[ccsrch_index-cardlen] == 66)
+      && (ccsrch_buf[ccsrch_index+2] > 64)
+      && (ccsrch_buf[ccsrch_index+2] < 91)) {
     trackdatacount++;
-    return(1);
+    return 1;
+  } else {
+    return 0;
   }
-  else
-    return(0);
 }
 
 int track2_srch(int cardlen)
 {
   /* [;:cardnum:=:expir date(YYMM), we'll use the ; here] */
   if (((ccsrch_buf[ccsrch_index+1] == '=') || (ccsrch_buf[ccsrch_index+1] == 68))
-    && ((ccsrch_buf[ccsrch_index-cardlen] == ';')||
-    ((ccsrch_buf[ccsrch_index-cardlen] > 57) || (ccsrch_buf[ccsrch_index-cardlen] < 91)) )
-    && ((ccsrch_buf[ccsrch_index+2] > 47)
-    && (ccsrch_buf[ccsrch_index+2] < 58))
-    && ((ccsrch_buf[ccsrch_index+3] > 47)
-    && (ccsrch_buf[ccsrch_index+3] < 58)))
-  {
+      && ((ccsrch_buf[ccsrch_index-cardlen] == ';')||
+      ((ccsrch_buf[ccsrch_index-cardlen] > 57) || (ccsrch_buf[ccsrch_index-cardlen] < 91)) )
+      && ((ccsrch_buf[ccsrch_index+2] > 47)
+      && (ccsrch_buf[ccsrch_index+2] < 58))
+      && ((ccsrch_buf[ccsrch_index+3] > 47)
+      && (ccsrch_buf[ccsrch_index+3] < 58))) {
     trackdatacount++;
-    return(1);
+    return 1;
+  } else {
+    return 0;
   }
-  else
-    return(0);
 }
 
 int process_prefix(int len, long offset)
 {
-  switch (len)
-  {
+  switch (len) {
     case 16:
-    check_mastercard_16(offset);
-    check_visa_16(offset);
-    check_discover_16(offset);
-    check_jcb_16(offset);
-    break;
-  case 15:
-    check_amex_15(offset);
-    check_enroute_15(offset);
-    check_jcb_15(offset);
-    break;
-  case 14:
-    check_diners_club_cb_14(offset);
-    break;
+      check_mastercard_16(offset);
+      check_visa_16(offset);
+      check_discover_16(offset);
+      check_jcb_16(offset);
+      break;
+    case 15:
+      check_amex_15(offset);
+      check_enroute_15(offset);
+      check_jcb_15(offset);
+      break;
+    case 14:
+      check_diners_club_cb_14(offset);
+      break;
 /** It has been purported that these cards are no longer in use
   case 13:
     check_visa_13(offset);
     break;
 **/
   }
-  return (0);
+  return 0;
 }
 
 int luhn_check(int len, long offset)
 {
-  int    i = 0;
-  int    tmp = 0;
-  int    total = 0;
+  int    i      = 0;
+  int    tmp    = 0;
+  int    total  = 0;
   int    nummod = 0;
   int    num[CARDSIZE];
 
   if (cardbuf[i]<=0)
-    return(0);
+    return 0;
 
   for (i=0; i<CARDSIZE; i++)
     num[i]=0;
@@ -264,17 +258,15 @@ int luhn_check(int len, long offset)
   printf("\n");
 #endif
 
-  for (i=len-2; i>=0; i-=2)
-  {
+  for (i=len-2; i>=0; i-=2) {
     tmp=2*num[i];
     num[i]=tmp;
     if (num[i]>9)
       num[i]-=9;
   }
 
-  for (i = 0; i < len; i++)
+  for (i=0; i<len; i++)
     total += num[i];
-
 
   nummod = total % 10;
   if (nummod == 0 && has_repeating_digits(len) == 0 && is_same_repeating_digits(len) == 0)
@@ -286,30 +278,25 @@ int luhn_check(int len, long offset)
     process_prefix(len, offset);
   }
 
-  return (nummod);
+  return nummod;
 }
 
 int has_repeating_digits(int len)
 {
-	int i = 0;
-	int last = cardbuf[0];
-	int ret = 0;
+	int i;
+	int last  = cardbuf[0];
+	int ret   = 0;
 	int count = 0;
 
-	for (i = 0; i < len; i++)
-	{
-		if (cardbuf[i] == last)
-		{
+	for (i=0; i<len; i++) {
+		if (cardbuf[i] == last) {
 			count++;
 
-			if (count == 7)
-			{
+			if (count == 7) {
 				ret = 1;
 				break;
 			}
-		}
-		else
-		{
+		} else {
 			last = cardbuf[i];
 			count = 0;
 		}
@@ -320,19 +307,15 @@ int has_repeating_digits(int len)
 
 int is_same_repeating_digits(int len)
 {
-	int i = 0;
+	int i;
 	int first = cardbuf[0];
-	int sec = cardbuf[1];
-	int ret = 0;
+	int sec   = cardbuf[1];
+	int ret   = 0;
 
-	for (i = 0; i < len; i = i + 2)
-	{
-		if (cardbuf[i] == first && (i+1 >= len || cardbuf[i+1] == sec))
-		{
+	for (i=0; i<len; i+=2) {
+		if (cardbuf[i] == first && (i+1 >= len || cardbuf[i+1] == sec)) {
 			ret = 1;
-		}
-		else
-		{
+		} else {
 			ret = 0;
 			break;
 		}
@@ -343,14 +326,14 @@ int is_same_repeating_digits(int len)
 
 int ccsrch(char *filename)
 {
-  FILE  *in = NULL;
-  int   infd = 0;
-  int   cnt = 0;
-  long  byte_offset=1;
-  int   k = 0;
-  int   counter = 0;
-  int   total = 0;
-  int   check = 0;
+  FILE  *in            = NULL;
+  int   infd           = 0;
+  int   cnt            = 0;
+  long  byte_offset    = 1;
+  int   k              = 0;
+  int   counter        = 0;
+  int   total          = 0;
+  int   check          = 0;
   int   limit_exceeded = 0;
 
 #ifdef DEBUG
@@ -358,16 +341,16 @@ int ccsrch(char *filename)
 #endif
 
   memset(&lastfilename,'\0',MAXPATH);
-  ccsrch_index=0;
-  errno = 0;
+  ccsrch_index =0;
+  errno        = 0;
   in = fopen(filename, "rb");
-  if (in == NULL)
-  {
-    if (errno==13)
+  if (in == NULL) {
+    if (errno==13) {
       fprintf(stderr, "ccsrch: Unable to open file %s for reading; Permission Denied\n", filename);
-    else
+    } else {
       fprintf(stderr, "ccsrch: Unable to open file %s for reading; errno=%d\n", filename, errno);
-    return (-1);
+    }
+    return -1;
   }
   infd = fileno(in);
   currfilename = filename;
@@ -377,8 +360,7 @@ int ccsrch(char *filename)
 
   initialize_buffer();
 
-  while (1 && limit_exceeded == 0)
-  {
+  while (1 && limit_exceeded == 0) {
     memset(&ccsrch_buf, '\0', BSIZE);
     cnt = read(infd, &ccsrch_buf, BSIZE - 1);
     if (cnt <= 0)
@@ -386,53 +368,42 @@ int ccsrch(char *filename)
 
     ccsrch_index = 0;
 
-    while (ccsrch_index < cnt && limit_exceeded == 0)
-    {
+    while (ccsrch_index < cnt && limit_exceeded == 0) {
       /* check to see if our data is 0...9 (based on ACSII value) */
-      if ((ccsrch_buf[ccsrch_index] >= 48) && (ccsrch_buf[ccsrch_index] <= 57))
-      {
+      if ((ccsrch_buf[ccsrch_index] >= 48) && (ccsrch_buf[ccsrch_index] <= 57)) {
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-48;
         counter++;
-      }
-      else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) ||
-      	(ccsrch_buf[ccsrch_index] == 13) || (ccsrch_buf[ccsrch_index] == 45))
-      {
+      } else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == 10) ||
+      	   (ccsrch_buf[ccsrch_index] == 13) || (ccsrch_buf[ccsrch_index] == 45)) {
         /*
          * we consider dashes, nulls, new lines, and carriage
          * returns to be noise, so ingore those
          */
         check = 0;
-      }
-      else
-      {
+      } else {
         check = 0;
         initialize_buffer();
         counter=0;
       }
 
-      if (((counter > 12) && (counter < CARDSIZE)) && (check))
-      {
-        switch (counter)
-        {
-        case 16:
-          luhn_check(16,byte_offset-16);
-          break;
-        case 15:
-          luhn_check(15,byte_offset-15);
-          break;
-        case 14:
-          luhn_check(14,byte_offset-14);
-          break;
-        case 13:
-          luhn_check(13,byte_offset-13);
-          break;
+      if (((counter > 12) && (counter < CARDSIZE)) && (check)) {
+        switch (counter) {
+          case 16:
+            luhn_check(16,byte_offset-16);
+            break;
+          case 15:
+            luhn_check(15,byte_offset-15);
+            break;
+          case 14:
+            luhn_check(14,byte_offset-14);
+            break;
+          case 13:
+            luhn_check(13,byte_offset-13);
+            break;
         }
-      }
-      else if ((counter == CARDSIZE) && (check))
-      {
-        for (k = 0; k < counter - 1; k++)
-        {
+      } else if ((counter == CARDSIZE) && (check)) {
+        for (k=0; k<counter-1; k++) {
           cardbuf[k] = cardbuf[k + 1];
         }
         cardbuf[k] = (-1);
@@ -446,9 +417,7 @@ int ccsrch(char *filename)
       ccsrch_index++;
 
       if (newstatus == 1)
-      {
       	update_status(currfilename, byte_offset);
-      }
 
       /* check to see if we've hit the limit for the current file */
       if (limit_file_results > 0 && file_hit_count >= limit_file_results)
@@ -458,86 +427,84 @@ int ccsrch(char *filename)
 
   fclose(in);
 
-  return (total);
+  return total;
 }
 
 int escape_space(char *infile, char *outfile)
 {
-  int    i = 0;
-  int    spc = 0;
+  int    i       = 0;
+  int    spc     = 0;
   char   *tmpbuf = NULL;
   int    filelen = 0;
-  int    newlen = 0;
-  int    newpos = 0;
+  int    newlen  = 0;
+  int    newpos  = 0;
 
   filelen = strlen(infile);
-  for (i = 0; i < filelen; i++)
+  for (i=0; i<filelen; i++) {
     if (infile[i] == ' ')
       spc++;
+  }
 
   newlen = filelen + spc + 1;
   errno = 0;
   tmpbuf = (char *)malloc(newlen);
-  if (tmpbuf == NULL)
-  {
+  if (tmpbuf == NULL) {
     fprintf(stderr, "escape_space: can't allocate memory; errno=%d\n", errno);
-    return (1);
+    return 1;
   }
   memset(tmpbuf, '\0', newlen);
 
   i = 0;
-  while (i < filelen)
-  {
-    if (infile[i] == ' ')
-    {
+  while (i < filelen) {
+    if (infile[i] == ' ') {
       tmpbuf[newpos++] = '\\';
       tmpbuf[newpos] = infile[i];
-    } else
+    } else {
       tmpbuf[newpos] = infile[i];
+    }
     newpos++;
     i++;
   }
   strncpy(outfile, tmpbuf, newlen);
   free(tmpbuf);
-  return (0);
+  return 0;
 }
 
 int get_file_stat(char *inputfile, struct stat * fileattr)
 {
   struct stat  ffattr;
-  int          err = 0;
+  int          err      = 0;
   char         *tmp2buf = NULL;
-  int          filelen = 0;
+  int          filelen  = 0;
 
   filelen = strlen(inputfile);
   errno = 0;
   tmp2buf = (char *) malloc(filelen+1);
 
-  if (tmp2buf == NULL)
-  {
+  if (tmp2buf == NULL) {
     fprintf(stderr, "get_file_stat: can't allocate memory; errno=%d\n", errno);
-    return (1);
+    return 1;
   }
   memset(tmp2buf, '\0', filelen+1);
   strncpy(tmp2buf, inputfile, filelen);
 
   errno=0;
   err = stat(tmp2buf, &ffattr);
-  if (err != 0)
-  {
-    if (errno == ENOENT)
+  if (err != 0) {
+    if (errno == ENOENT) {
       fprintf(stderr, "get_file_stat: File %s not found, can't get stat info\n", inputfile);
-    else
+    } else {
       fprintf(stderr, "get_file_stat: Cannot stat file %s; errno=%d\n", inputfile, errno);
+    }
     free(tmp2buf);
-    return (-1);
+    return -1;
   }
   memcpy(fileattr, &ffattr, sizeof(ffattr));
   currfile_atime=ffattr.st_atime;
   currfile_mtime=ffattr.st_mtime;
   currfile_ctime=ffattr.st_ctime;
   free(tmp2buf);
-  return (0);
+  return 0;
 }
 
 int proc_dir_list(char *instr)
@@ -545,9 +512,9 @@ int proc_dir_list(char *instr)
   DIR            *dirptr;
   struct dirent  *direntptr;
   int             dir_name_len = 0;
-  char           *curr_path = NULL;
+  char           *curr_path    = NULL;
   struct stat     fstat;
-  int             err = 0;
+  int             err          = 0;
   char            tmpbuf[4096];
 
   errno = 0;
@@ -558,24 +525,21 @@ int proc_dir_list(char *instr)
   printf("Checking directory <%s>\n",instr);
 #endif
 
-  if (dirptr == NULL)
-  {
+  if (dirptr == NULL) {
     fprintf(stderr, "proc_dir_list: Can't open dir %s; errno=%d\n", instr, errno);
-    return (1);
+    return 1;
   }
   errno = 0;
   curr_path = (char *)malloc(MAXPATH + 1);
-  if (curr_path == NULL)
-  {
+  if (curr_path == NULL) {
     fprintf(stderr, "proc_dir_list: Can't allocate enough space; errno=%d\n", errno);
     closedir(dirptr);
-    return (1);
+    return 1;
   }
   memset(curr_path, '\0', MAXPATH+1);
   strncpy(curr_path, instr, MAXPATH);
   errno = 0;
-  while ((direntptr = readdir(dirptr)) != NULL)
-  {
+  while ((direntptr = readdir(dirptr)) != NULL) {
     /* readdir give us everything and not necessarily in order. This
        logic is just silly, but it works */
     if (((direntptr->d_name[0] == '.') &&
@@ -589,66 +553,49 @@ int proc_dir_list(char *instr)
     strncat(curr_path, direntptr->d_name, MAXPATH);
     err = get_file_stat(curr_path, &fstat);
 
-    if (err == -1)
-    {
+    if (err == -1) {
       if (errno == ENOENT)
         fprintf(stderr, "proc_dir_list: file %s not found, can't stat\n", curr_path);
       else
         fprintf(stderr, "proc_dir_list: Cannot stat file %s; errno=%d\n", curr_path, errno);
       closedir(dirptr);
-      return (1);
+      return 1;
     }
-    if ((fstat.st_mode & S_IFMT) == S_IFDIR)
-    {
+    if ((fstat.st_mode & S_IFMT) == S_IFDIR) {
       strncat(curr_path, "/", MAXPATH);
       proc_dir_list(curr_path);
-    }
-    else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG))
-    {
+    } else if ((fstat.st_size > 0) && ((fstat.st_mode & S_IFMT) == S_IFREG)) {
       memset(&tmpbuf, '\0', 4096);
-      if (escape_space(curr_path, tmpbuf) == 0)
-      {
+      if (escape_space(curr_path, tmpbuf) == 0) {
         /* rest file_hit_count so we can keep track of many hits each file has */
         file_hit_count = 0;
 
-        if (is_allowed_file_type(curr_path) == 0)
-        {
+        if (is_allowed_file_type(curr_path) == 0) {
 	        /*
 	         * kludge, need to clean this up
 	         * later else any string matching in the path returns non NULL
 	         */
-	        if (logfilename != NULL)
-	          if (strstr(curr_path, logfilename) != NULL)
+	        if (logfilename != NULL) {
+	          if (strstr(curr_path, logfilename) != NULL) {
 	            fprintf(stderr, "We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", curr_path);
-	          else
-	          {
+            } else {
 	            ccsrch(curr_path);
 	            if (file_hit_count > 0 && print_file_hit_count == 1)
 	              printf("%s: %d hits\n", curr_path, file_hit_count);
 	          }
-	        else
-	        {
+	        } else {
 	          ccsrch(curr_path);
 	        }
         }
       }
     }
-#ifdef DEBUG
-    else
-    {
-      if (fstat.st_size > 0)
-        fprintf(stderr, "proc_dir_list: Unknown mode returned-> %x for file %s\n", fstat.st_mode,curr_path);
-      else
-        fprintf(stderr, "Not processing file of size 0 bytes: %s\n", curr_path);
-    }
-#endif
     curr_path[dir_name_len] = '\0';
   }
 
   free(curr_path);
 
   closedir(dirptr);
-  return (0);
+  return 0;
 }
 
 void check_mastercard_16(long offset)
@@ -739,7 +686,7 @@ void check_diners_club_cb_14(long offset)
 {
   char  num2buf[4];
   char  num2buf2[3];
-  int   vnum = 0;
+  int   vnum  = 0;
   int   vnum2 = 0;
 
   memset(&num2buf, '\0', 4);
@@ -758,7 +705,7 @@ void cleanup_shtuff()
 
   end_time=time(NULL);
   fprintf(stdout, "\n\nFiles searched ->\t\t%ld\n", file_count);
-  fprintf(stdout, "Search time (seconds) ->\t%d\n", ((int)time(NULL) - init_time));
+  fprintf(stdout, "Search time (seconds) ->\t%ld\n", ((int)time(NULL) - init_time));
   fprintf(stdout, "Credit card matches->\t\t%ld\n", total_count);
   if (tracksrch)
     fprintf(stdout, "Track data pattern matches->\t%d\n\n", trackdatacount);
@@ -806,16 +753,14 @@ void usage(char *progname)
 int open_logfile()
 {
   errno = 0;
-  if (logfilename!=NULL)
-  {
+  if (logfilename!=NULL) {
     logfilefd = fopen(logfilename, "a+");
-    if (logfilefd == NULL)
-    {
+    if (logfilefd == NULL) {
       fprintf(stderr, "Unable to open logfile %s for writing; errno=%d\n", logfilename, errno);
-      return (-1);
+      return -1;
     }
   }
-  return (0);
+  return 0;
 }
 
 int check_dir (char *name)
@@ -823,58 +768,53 @@ int check_dir (char *name)
   DIR            *dirptr;
 
   dirptr = opendir(name);
-  if (dirptr!=NULL)
-  {
+  if (dirptr!=NULL) {
     closedir(dirptr);
-    return(1);
+    return 1;
+  } else {
+    return 0;
   }
-  else
-    return (0);
 }
 
 int is_allowed_file_type (char *name)
 {
-	char delim[] = ",";
+	char delim[]  = ",";
 	char *exclude = NULL;
-	char *fname = NULL;
-	char *result = NULL;
-	char *ext = NULL;
-	int ret = 0;
+	char *fname   = NULL;
+	char *result  = NULL;
+	char *ext     = NULL;
+	int ret       = 0;
 
-	if(exclude_extensions != NULL)
-  {
+	if(exclude_extensions != NULL) {
 		exclude = malloc(sizeof(char) * strlen(exclude_extensions) + 1);
 		strcpy(exclude, exclude_extensions);
 		fname = malloc(sizeof(char) * strlen(name) + 1);
 		strcpy(fname, name);
 		ext = stolower(get_filename_ext(fname));
-		if (ext != NULL && ext[0] != '\0')
-		{
+		if (ext != NULL && ext[0] != '\0') {
 			result = strtok(exclude, delim);
-			while(result != NULL)
-			{
-				if(strcmp(result, ext) ==0)
-			  {
+			while(result != NULL) {
+				if(strcmp(result, ext) ==0) {
 					ret = 1;
 					break;
-				}
-				else
+				} else {
 					result = strtok(NULL, delim);
+        }
 			}
 		}
 		free(exclude);
 		free(fname);
   }
 
-	return (ret);
+	return ret;
 }
 
 char *get_filename_ext(char *filename)
 {
 	char *slash = strrchr(filename, '/');
-  char *dot = strrchr(slash, '.');
+  char *dot   = strrchr(slash, '.');
   if(!dot || dot == slash) return "";
-  return (dot);
+  return dot;
 }
 
 char* stolower(char* s)
@@ -891,13 +831,12 @@ char* stolower(char* s)
 void update_status(char *filename, int position)
 {
 	struct tm *current;
-	time_t now;
-	char msgbuffer[512];
-	char *fn;
+	time_t     now;
+	char       msgbuffer[512];
+	char      *fn;
 
 	/* if ((int)time(NULL) > status_lastupdate) */
-	if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate)
-	{
+	if (position % (1024 * 1024) == 0 || (int)time(NULL) > status_lastupdate) {
     printf("%*s\r", status_msglength, " ");
 
     time(&now);
@@ -905,10 +844,11 @@ void update_status(char *filename, int position)
 
 	  fn = strrchr(filename, '/');
 
-	  if (fn == NULL)
+	  if (fn == NULL) {
 	  	fn = filename;
-	  else
+    } else {
 	    fn++;
+    }
 
     status_msglength = sprintf(msgbuffer, "[%02i:%02i:%02i File: %s - Processed: %iMB]\r",
       current->tm_hour, current->tm_min, current->tm_sec,
@@ -926,87 +866,83 @@ void update_status(char *filename, int position)
 int main(int argc, char *argv[])
 {
   struct stat	ffstat;
-  char  *inputstr = NULL;
-  char  *inbuf = NULL;
-  char  *tracktype_str=NULL;
+  char  *inputstr      = NULL;
+  char  *inbuf         = NULL;
+  char  *tracktype_str = NULL;
   char  tmpbuf[4096];
-  int   inlen = 0, err=0, c=0;
-  int   limit_arg = 0;
+  int   inlen          = 0;
+  int   err            = 0;
+  int   c              = 0;
+  int   limit_arg      = 0;
 
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"befjt:To:cml:n:s")) != -1)
-  {
-    switch (c)
-    {
-    case 'b':
-      print_byte_offset=1;
-      break;
-    case 'e':
-      print_epoch_time=1;
-      break;
-    case 'f':
-      print_filename_only=1;
-      break;
-    case 'j':
-      print_julian_time=1;
-      break;
-    case 'o':
-      logfilename=optarg;
-      break;
-    case 't':
-      tracksrch=1;
-      tracktype_str=optarg;
-      if (atoi(tracktype_str)==1)
+  while ((c = getopt(argc, argv,"befjt:To:cml:n:s")) != -1) {
+      switch (c) {
+      case 'b':
+        print_byte_offset=1;
+        break;
+      case 'e':
+        print_epoch_time=1;
+        break;
+      case 'f':
+        print_filename_only=1;
+        break;
+      case 'j':
+        print_julian_time=1;
+        break;
+      case 'o':
+        logfilename=optarg;
+        break;
+      case 't':
+        tracksrch=1;
+        tracktype_str=optarg;
+        if (atoi(tracktype_str)==1)
+          tracktype1=1;
+        else if (atoi(tracktype_str)==2)
+          tracktype2=1;
+        else
+          usage(argv[0]);
+        break;
+      case 'T':
+        tracksrch=1;
         tracktype1=1;
-      else if (atoi(tracktype_str)==2)
         tracktype2=1;
-      else
-        usage(argv[0]);
-      break;
-    case 'T':
-      tracksrch=1;
-      tracktype1=1;
-      tracktype2=1;
-      break;
-    case 'c':
-    	print_file_hit_count=1;
-    	break;
-    case 'm':
-      mask_card_number=1;
-      break;
-    case 'l':
-    	limit_arg = atoi(optarg);
-    	if (limit_arg > 0)
-    	  limit_file_results = limit_arg;
-    	else
-    		usage(argv[0]);
-    	break;
-    case 'n':
-    	exclude_extensions = stolower(optarg);
-    	break;
-    case 's':
-    	newstatus = 1;
+        break;
+      case 'c':
+      	print_file_hit_count=1;
+      	break;
+      case 'm':
+        mask_card_number=1;
+        break;
+      case 'l':
+      	limit_arg = atoi(optarg);
+      	if (limit_arg > 0)
+      	  limit_file_results = limit_arg;
+      	else
+      		usage(argv[0]);
+      	break;
+      case 'n':
+      	exclude_extensions = stolower(optarg);
+      	break;
+      case 's':
+      	newstatus = 1;
 
-    	break;
-    case 'h':
-    default:
-      usage(argv[0]);
-      break;
+      	break;
+      case 'h':
+      default:
+        usage(argv[0]);
+        break;
     }
   }
 
   /* do some cleanup to make sure that invalid options don't get combined */
-  if (logfilename != NULL)
-  {
-    if (newstatus == 1)
-    {
+  if (logfilename != NULL) {
+    if (newstatus == 1) {
     	print_file_hit_count = 0;
     }
-  }
-  else
-  {
+  } else {
   	newstatus = 0;
   	print_file_hit_count = 0;
   }
@@ -1030,8 +966,7 @@ int main(int argc, char *argv[])
   init_time = time(NULL);
   printf("\n%s\n", PROG_VER);
   printf("\nLocal start time: %s\n",ctime((time_t *)&init_time));
-  if (check_dir(inbuf))
-  {
+  if (check_dir(inbuf)) {
 #ifdef WINDOWS
     if ((inbuf[strlen(inbuf) - 1]) != '\\')
       inbuf[strlen(inbuf)] = '\\';
@@ -1040,45 +975,36 @@ int main(int argc, char *argv[])
       inbuf[strlen(inbuf)] = '/';
 #endif
     proc_dir_list(inbuf);
-  }
-  else
-  {
+  } else {
     err = get_file_stat(inbuf, &ffstat);
-    if (err == -1)
-    {
-      if (errno == ENOENT)
+    if (err == -1) {
+      if (errno == ENOENT) {
         fprintf(stderr, "File %s not found, can't stat\n", inbuf);
-      else
+      } else {
         fprintf(stderr, "Cannot stat file %s; errno=%d\n", inbuf, errno);
+      }
       exit (-1);
     }
 
-    if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG))
-    {
+    if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG)) {
       memset(&tmpbuf, '\0', 4096);
-      if (escape_space(inbuf, tmpbuf) == 0)
-      {
+      if (escape_space(inbuf, tmpbuf) == 0) {
         if (logfilename != NULL)
-          if (strstr(inbuf, logfilename) != NULL)
-          fprintf(stderr, "main: We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", inbuf);
-          else
-          {
+          if (strstr(inbuf, logfilename) != NULL) {
+            fprintf(stderr, "main: We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", inbuf);
+          } else {
 #ifdef DEBUG
             printf("Processing file %s\n",inbuf);
 #endif
             ccsrch(inbuf);
           }
-        else
-        {
+        } else {
 #ifdef DEBUG
           printf("Processing file %s\n",inbuf);
 #endif
           ccsrch(inbuf);
         }
-      }
-    }
-    else if ((ffstat.st_mode & S_IFMT) == S_IFDIR)
-    {
+      } else if ((ffstat.st_mode & S_IFMT) == S_IFDIR) {
 #ifdef WINDOWS
       if ((inbuf[strlen(inbuf) - 1]) != '\\')
         inbuf[strlen(inbuf)] = '\\';
@@ -1087,13 +1013,13 @@ int main(int argc, char *argv[])
         inbuf[strlen(inbuf)] = '/';
 #endif
       proc_dir_list(inbuf);
-    }
-    else
+    } else {
       fprintf(stderr, "main: Unknown mode returned-> %x\n", ffstat.st_mode);
+    }
   }
 
   cleanup_shtuff();
   free(inbuf);
 
-  return (0);
+  return 0;
 }
