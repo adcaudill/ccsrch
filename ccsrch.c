@@ -130,7 +130,7 @@ static int track2_srch(int cardlen)
 
 static void print_result(const char *cardname, int cardlen, long byte_offset)
 {
-  int		i = 0;
+  int		i;
   char	nbuf[20];
   char	buf[MAXPATH];
   char	basebuf[MDBUFSIZE];
@@ -511,7 +511,7 @@ static int ccsrch(const char *filename)
         for (k=0; k<counter-1; k++) {
           cardbuf[k] = cardbuf[k + 1];
         }
-        cardbuf[k] = (-1);
+        cardbuf[k] = -1;
         luhn_check(13,byte_offset-13);
         luhn_check(14,byte_offset-14);
         luhn_check(15,byte_offset-15);

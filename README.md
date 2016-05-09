@@ -19,10 +19,12 @@ This project is a fork of CCSRCH as maintained by Mike Beekey at: http://sourcef
 ```
 Usage: ./ccsrch <options> <start path>
   where <options> are:
+    -a             Limit to ascii files.
     -b             Add the byte offset into the file of the number
     -e             Include the Modify Access and Create times in terms
                    of seconds since the epoch
     -f             Just output the filename with potential PAN data
+    -i <filename>  Ignore credit card numbers in this list (test cards)
     -j             Include the Modify Access and Create times in terms
                    of normal date/time
     -o <filename>  Output the data to the file <filename> vs. standard out
