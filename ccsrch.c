@@ -468,7 +468,7 @@ static int ccsrch(const char *filename)
 
   initialize_buffer();
 
-  while (1 && limit_exceeded == 0) {
+  while (limit_exceeded == 0) {
     memset(&ccsrch_buf, '\0', BSIZE);
     cnt = fread(&ccsrch_buf, 1, BSIZE - 1, in);
     if (cnt <= 0)
@@ -479,7 +479,7 @@ static int ccsrch(const char *filename)
 
     for (ccsrch_index=0; ccsrch_index<cnt && limit_exceeded==0; ccsrch_index++) {
       /* check to see if our data is 0...9 (based on ACSII value) */
-      if ((ccsrch_buf[ccsrch_index] >= '0') && (ccsrch_buf[ccsrch_index] <= '9')) {
+      if (isdigit(ccsrch_buf[ccsrch_index])) {
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-'0';
         counter++;
@@ -845,7 +845,7 @@ int main(int argc, char *argv[])
       switch (c) {
         case 'a':
           limit_ascii = 1;
-        break;
+          break;
         case 'b':
           print_byte_offset=1;
           break;
