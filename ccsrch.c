@@ -78,6 +78,7 @@ static int    status_lastupdate    = 0;
 static int    status_msglength     = 0;
 static int    mask_card_number     = 0;
 static int    limit_ascii          = 0;
+static int    ignore_count         = 0;
 
 static void initialize_buffer()
 {
@@ -113,8 +114,8 @@ static int track2_srch(int cardlen)
 {
   /* [;:cardnum:=:expir date(YYMM), we'll use the ; here] */
   if (((ccsrch_buf[ccsrch_index+1] == '=') || (ccsrch_buf[ccsrch_index+1] == 'D'))
-      && ((ccsrch_buf[ccsrch_index-cardlen] == ';')||
-      ((ccsrch_buf[ccsrch_index-cardlen] > '9') || (ccsrch_buf[ccsrch_index-cardlen] < '[')) )
+      && ((ccsrch_buf[ccsrch_index-cardlen+1] == ';')||
+      ((ccsrch_buf[ccsrch_index-cardlen+1] > '9') || (ccsrch_buf[ccsrch_index-cardlen+1] < '[')) )
       && ((ccsrch_buf[ccsrch_index+2] > '/')
       && (ccsrch_buf[ccsrch_index+2] < ':'))
       && ((ccsrch_buf[ccsrch_index+3] > '/')
@@ -139,11 +140,17 @@ static void print_result(const char *cardname, int cardlen, long byte_offset)
   char	adatebuf[CARDTYPELEN];
   char	cdatebuf[CARDTYPELEN];
   char	trackbuf[MDBUFSIZE];
+  int   char_before = ccsrch_index - cardlen - ignore_count;
+
+  /* If char directly before or after card are a number, don't print */
+  if ((char_before >= 0 && isdigit(ccsrch_buf[char_before])) ||
+      isdigit(ccsrch_buf[ccsrch_index+1]))
+    return;
 
   memset(&nbuf, '\0', sizeof(nbuf));
 
   for (i=0; i<cardlen; i++)
-    nbuf[i] = cardbuf[i]+48;
+    nbuf[i] = cardbuf[i]+'0';
 
   if (ignore && strstr(ignore, nbuf) != NULL)
     return;
@@ -462,8 +469,8 @@ static int ccsrch(const char *filename)
     return -1;
   }
   currfilename = filename;
-  byte_offset=1;
-
+  byte_offset  = 1;
+  ignore_count = 0;
   file_count++;
 
   initialize_buffer();
@@ -489,11 +496,13 @@ static int ccsrch(const char *filename)
          * we consider dashes, nulls, new lines, and carriage
          * returns to be noise, so ingore those
          */
+         ignore_count += 1;
         check = 0;
       } else {
         check = 0;
         initialize_buffer();
-        counter=0;
+        counter      = 0;
+        ignore_count = 0;
       }
 
       if (((counter > 12) && (counter < CARDSIZE)) && (check)) {
