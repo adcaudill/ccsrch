@@ -58,6 +58,10 @@ Search for credit card data and check for Track 2 data formats with output to fi
 
 `ccsrch -t 2 -o c.log ./`
 
+Search for all track data types in ascii only files and ignore known test card numbers:
+
+`ccsrch -T -i ignore.list -a ./`
+
 ### Output
 
 All output is tab delimited with the following order (depending on the parameters):
