@@ -775,6 +775,7 @@ static void usage(const char *progname)
   printf("    -l N\t   Limits the number of results from a single file before going\n\t\t   on to the next file.\n");
   printf("    -n <list>      File extensions to exclude (i.e .dll,.exe)\n");
   printf("    -m\t\t   Mask the PAN number.\n");
+  printf("    -w\t\t   Check for card matches wrapped across lines.\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
