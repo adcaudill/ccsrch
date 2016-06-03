@@ -79,6 +79,7 @@ static int    status_msglength     = 0;
 static int    mask_card_number     = 0;
 static int    limit_ascii          = 0;
 static int    ignore_count         = 0;
+static int    wrap                 = 0;
 
 static void initialize_buffer()
 {
@@ -490,8 +491,8 @@ static int ccsrch(const char *filename)
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-'0';
         counter++;
-      } else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == '\r') ||
-      	   (ccsrch_buf[ccsrch_index] == '\n') || (ccsrch_buf[ccsrch_index] == '-')) {
+      } else if ((ccsrch_buf[ccsrch_index] == 0) || (wrap && ccsrch_buf[ccsrch_index] == '\r') ||
+      	   (wrap && ccsrch_buf[ccsrch_index] == '\n') || (ccsrch_buf[ccsrch_index] == '-')) {
         /*
          * we consider dashes, nulls, new lines, and carriage
          * returns to be noise, so ingore those
@@ -850,7 +851,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:s")) != -1) {
+  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:sw")) != -1) {
       switch (c) {
         case 'a':
           limit_ascii = 1;
@@ -909,6 +910,9 @@ int main(int argc, char *argv[])
         case 's':
         	newstatus = 1;
 
+        	break;
+        case 'w':
+        	wrap = 1;
         	break;
         case 'h':
         default:
