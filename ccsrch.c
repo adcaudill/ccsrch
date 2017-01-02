@@ -927,73 +927,78 @@ int main(int argc, char *argv[])
   	print_file_hit_count = 0;
   }
 
-  inputstr = argv[optind];
-  if (inputstr == NULL)
-    usage(argv[0]);
-
-  if (open_logfile() < 0)
-    exit(-1);
-
-  inbuf = strdup(inputstr);
-  if (inbuf == NULL) {
-    fprintf(stderr, "strdup: cannot allocate memory erro=%d\n", errno);
-    cleanup_shtuff();
-  }
-  signal_proc();
-
   init_time = time(NULL);
   printf("\n%s\n", PROG_VER);
   printf("\nLocal start time: %s\n",ctime((time_t *)&init_time));
-  if (check_dir(inbuf)) {
-#ifdef WINDOWS
-    if ((inbuf[strlen(inbuf) - 1]) != '\\')
-      inbuf[strlen(inbuf)] = '\\';
-#else
-    if ((inbuf[strlen(inbuf) - 1]) != '/')
-      inbuf[strlen(inbuf)] = '/';
-#endif
-    proc_dir_list(inbuf);
-  } else {
-    err = get_file_stat(inbuf, &ffstat);
-    if (err == -1) {
-      if (errno == ENOENT) {
-        fprintf(stderr, "File %s not found, can't stat\n", inbuf);
-      } else {
-        fprintf(stderr, "Cannot stat file %s; errno=%d\n", inbuf, errno);
-      }
-      exit(-1);
-    }
 
-    if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG)) {
-      memset(&tmpbuf, '\0', BSIZE);
-      if (escape_space(inbuf, tmpbuf) == 0) {
-        if (logfilename != NULL) {
-          if (strstr(inbuf, logfilename) != NULL) {
-            fprintf(stderr, "main: We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", inbuf);
+  for ( ; optind < argc; optind++) {
+    inputstr = argv[optind];
+    if (inputstr == NULL)
+      usage(argv[0]);
+  
+    if (open_logfile() < 0)
+      exit(-1);
+  
+    inbuf = strdup(inputstr);
+    if (inbuf == NULL) {
+      fprintf(stderr, "strdup: cannot allocate memory erro=%d\n", errno);
+      cleanup_shtuff();
+    }
+    signal_proc();
+    if (check_dir(inbuf)) {
+#ifdef WINDOWS
+      if ((inbuf[strlen(inbuf) - 1]) != '\\')
+        strcat(inbuf,"\\");
+#else
+      if ((inbuf[strlen(inbuf) - 1]) != '/')
+        strcat(inbuf,"/");
+#endif
+#ifdef DEBUG
+    printf("\nChecking path parameter <%s>\n",inbuf);
+#endif
+      proc_dir_list(inbuf);
+    } else {
+      err = get_file_stat(inbuf, &ffstat);
+      if (err == -1) {
+        if (errno == ENOENT) {
+          fprintf(stderr, "File %s not found, can't stat\n", inbuf);
+        } else {
+          fprintf(stderr, "Cannot stat file %s; errno=%d\n", inbuf, errno);
+        }
+        exit(-1);
+      }
+  
+      if ((ffstat.st_size > 0) && ((ffstat.st_mode & S_IFMT) == S_IFREG)) {
+        memset(&tmpbuf, '\0', BSIZE);
+        if (escape_space(inbuf, tmpbuf) == 0) {
+          if (logfilename != NULL) {
+            if (strstr(inbuf, logfilename) != NULL) {
+              fprintf(stderr, "main: We seem to be hitting our log file, so we'll leave this out of the search -> %s\n", inbuf);
+            } else {
+#ifdef DEBUG
+              printf("Processing file %s\n",inbuf);
+#endif
+              ccsrch(inbuf);
+            }
           } else {
 #ifdef DEBUG
             printf("Processing file %s\n",inbuf);
 #endif
             ccsrch(inbuf);
           }
-        } else {
-#ifdef DEBUG
-          printf("Processing file %s\n",inbuf);
-#endif
-          ccsrch(inbuf);
         }
-      }
-    } else if ((ffstat.st_mode & S_IFMT) == S_IFDIR) {
+      } else if ((ffstat.st_mode & S_IFMT) == S_IFDIR) {
 #ifdef WINDOWS
-      if ((inbuf[strlen(inbuf) - 1]) != '\\')
-        inbuf[strlen(inbuf)] = '\\';
+        if ((inbuf[strlen(inbuf) - 1]) != '\\')
+          inbuf[strlen(inbuf)] = '\\';
 #else
-      if ((inbuf[strlen(inbuf) - 1]) != '/')
-        inbuf[strlen(inbuf)] = '/';
+        if ((inbuf[strlen(inbuf) - 1]) != '/')
+          inbuf[strlen(inbuf)] = '/';
 #endif
-      proc_dir_list(inbuf);
-    } else {
-      fprintf(stderr, "main: Unknown mode returned-> %x\n", ffstat.st_mode);
+        proc_dir_list(inbuf);
+      } else {
+        fprintf(stderr, "main: Unknown mode returned-> %x\n", ffstat.st_mode);
+      }
     }
   }
   free(inbuf);
