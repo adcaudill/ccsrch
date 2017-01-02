@@ -79,6 +79,7 @@ static int    status_msglength     = 0;
 static int    mask_card_number     = 0;
 static int    limit_ascii          = 0;
 static int    ignore_count         = 0;
+static int    wrap                 = 0;
 
 static void initialize_buffer()
 {
@@ -490,8 +491,8 @@ static int ccsrch(const char *filename)
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-'0';
         counter++;
-      } else if ((ccsrch_buf[ccsrch_index] == 0) || (ccsrch_buf[ccsrch_index] == '\r') ||
-      	   (ccsrch_buf[ccsrch_index] == '\n') || (ccsrch_buf[ccsrch_index] == '-')) {
+      } else if ((ccsrch_buf[ccsrch_index] == 0) || (wrap && ccsrch_buf[ccsrch_index] == '\r') ||
+      	   (wrap && ccsrch_buf[ccsrch_index] == '\n') || (ccsrch_buf[ccsrch_index] == '-')) {
         /*
          * we consider dashes, nulls, new lines, and carriage
          * returns to be noise, so ingore those
@@ -774,6 +775,7 @@ static void usage(const char *progname)
   printf("    -l N\t   Limits the number of results from a single file before going\n\t\t   on to the next file.\n");
   printf("    -n <list>      File extensions to exclude (i.e .dll,.exe)\n");
   printf("    -m\t\t   Mask the PAN number.\n");
+  printf("    -w\t\t   Check for card matches wrapped across lines.\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
@@ -850,7 +852,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:s")) != -1) {
+  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:sw")) != -1) {
       switch (c) {
         case 'a':
           limit_ascii = 1;
@@ -909,6 +911,9 @@ int main(int argc, char *argv[])
         case 's':
         	newstatus = 1;
 
+        	break;
+        case 'w':
+        	wrap = 1;
         	break;
         case 'h':
         default:

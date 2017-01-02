@@ -37,7 +37,8 @@ Usage: ./ccsrch <options> <start path>
                    on to the next file.
     -n <list>      File extensions to exclude (i.e .dll,.exe)
     -m             Mask the PAN number.
-    -h             Usage information
+    -w             Check for card matches wrapped across lines.
+-h             Usage information
 ```
 
 **Examples:**
